@@ -11,9 +11,10 @@ class State(object) :
 			self.y_size = arena_size[1]
 			self.max_food_num = max_food_num
 			self.coordinate_pairs = [(i*2,j*2) for i in range(1,arena_size[0]-1) for j in range(1,arena_size[1]-1)]
-			random_player_positions = sample(range(len(self.coordinate_pairs)), num_players)
-			coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
-			self.player_list = [player.Player(i,j) for (i,j) in coordinates]
+			#random_player_positions = sample(range(len(self.coordinate_pairs)), num_players)
+			#coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
+			#self.player_list = [player.Player(i,j) for (i,j) in coordinates]
+			self.player_list = []
 			self.food_list = []
 			self.beamed_list = []
 			self.food_rate = food_rate
@@ -300,3 +301,6 @@ class State(object) :
 		def setEpsilon(self,epsilon):
 			for player in self.player_list:
 				player.epsilon = epsilon
+
+		def setListOfPlayers(self, listOfPlayers):
+                        self.player_list = listOfPlayers
