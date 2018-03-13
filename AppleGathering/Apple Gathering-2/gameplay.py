@@ -50,7 +50,6 @@ class State(object) :
 			return collectiveAct
 		
 		def revive(self):
-			#find possible locations to revive dead player
 			for player in self.player_list:
 				player.setAlive()
 
