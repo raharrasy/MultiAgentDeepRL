@@ -1,8 +1,8 @@
 import pygame
-import player
-import gameplay
-import Draw
-import food
+from AgentExample import player
+from AppleGatheringGame import gameplay
+from AppleGatheringGame import Draw
+from AppleGatheringGame import food
 import numpy as np
 
 
@@ -57,9 +57,14 @@ class Simulation(object):
 			for player in self.state.player_list:
 				player.checkpointing(suffix+str(counter)+prefix)
 				counter += 1
-		#		counter += 1
+
+	def setAgentsList(self,listOfPlayers):
+                self.state.setListOfPlayers(listOfPlayers)
 
 
 if __name__ == '__main__':
 	app = Simulation((25,25),4,8,15)
+	random_player_positions = sample(range(len(self.state.coordinate_pairs)), num_players)
+	coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
+	self.player_list = [player.Player(i,j) for (i,j) in coordinates]
 	app.run()
