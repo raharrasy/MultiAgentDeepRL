@@ -17,11 +17,10 @@ class State(object) :
 			self.food_list = []
 			self.beamed_list = []
 			self.food_rate = food_rate
-			self.waiting_time = food_rate
+			self.waiting_time = self.food_rate
 			self.remaining_game_frames = num_game_frames
 			self.sight_radius = sight_radius
 			self.RGBMatrix = None
-			# np.asarray(pygame.surfarray.array3d(self.screen))
 
 		def reset(self, food_rate = 15, num_game_frames = 60000):
 			random_player_positions = sample(range(len(self.coordinate_pairs)), len(self.player_list))
@@ -298,31 +297,7 @@ class State(object) :
 				chosenCoordinate = possibleCoordinates[food_positions[0]]
 				self.food_list.append(food.Food(chosenCoordinate[0],chosenCoordinate[1]))
 
-		def saveWeights(self):
-			counter = 0
-			suffix = "../tmp/Apple/DDQN/Player"
-			prefix = ".ckpt"
-			for player in self.player_list:
-				player.save(suffix+str(counter)+prefix)
-				counter += 1
-
-		def checkpointing(self):
-			counter = 0
-                        #save_path = saver.save(sess, "../tmp/Wolfpack/DDQN/Food")
-			suffix = "../tmp/checkpoint/Apple/DDQN/Player"
-			prefix = ".ckpt"
-			for player in self.player_list:
-				player.checkpointing(suffix+str(counter)+prefix)
-				counter += 1
-
-		def checkpointing2(self,step=0):
-			counter = 0
-			suffix = "../tmp2/checkpoint/Apple/DDQN/Player"
-			prefix = ".ckpt"
-			for player in self.player_list:
-				player.checkpointing2(suffix+str(counter)+prefix,step)
-				counter += 1
-
+		
 		def setEpsilon(self,epsilon):
 			for player in self.player_list:
 				player.epsilon = epsilon

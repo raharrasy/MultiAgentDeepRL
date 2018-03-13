@@ -215,11 +215,5 @@ class Player(object) :
 
 		return self.action_num
 
-	def save(self,filename):
-		self.NN.save(filename)
-
-	def checkpointing(self, filename):
-		self.NN.checkpointing(filename)
-
-	def checkpointing2(self, filename, step = 0):
-		self.NN.checkpointing2(filename,step)
+	def checkpointing(self, filename, step = 0):
+		self.NN.checkpointing(filename,step)

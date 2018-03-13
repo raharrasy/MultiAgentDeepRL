@@ -26,6 +26,7 @@ class Simulation(object):
 		self.state.sense(np.asarray(pygame.surfarray.array3d(self.screen)))
 		pointsPerEpisode = []
 		aggressiveness = []
+		self.checkpointing(self.epsCounter)
 		while True :
 			self.screen.fill((0,0,0))
 			self.state.updateState()
@@ -42,14 +43,21 @@ class Simulation(object):
 				self.epsCounter += 1
 				self.display.drawState()
 				self.state.sense(np.asarray(pygame.surfarray.array3d(self.screen)))
-				self.state.checkpointing()
-				self.state.checkpointing2(self.epsCounter)
+				self.checkpointing(self.epsCounter)
 				if self.epsCounter <= 32:
 					epsilon = 1 - (self.epsCounter * (0.95/40))
 					self.state.setEpsilon(epsilon)
 			if self.epsCounter > 200:
 				break
-		self.state.saveWeights()
+
+	def checkpointing(self):
+			counter = 0
+			suffix = "../tmp/Apple/DDQN/Player"
+			prefix = ".ckpt"
+			for player in self.state.player_list:
+				player.checkpointing(suffix+str(counter)+prefix)
+				counter += 1
+		#		counter += 1
 
 
 if __name__ == '__main__':

@@ -113,11 +113,5 @@ class ConvNet(object):
 		save_path = self.saver.save(self.sess, filename)
 		print("Model saved in file: %s" % save_path)
 
-	def checkpointing(self, filename):
-                save_path = self.saver.save(self.sess, filename)
-                self.sess.close()
-                self.sess = tf.Session()
-                self.saver.restore(self.sess, filename)
-
-	def checkpointing2(self, filename, step = 0):
+	def checkpointing(self, filename, step = 0):
                 save_path = self.saver.save(self.sess, filename, global_step = step)
