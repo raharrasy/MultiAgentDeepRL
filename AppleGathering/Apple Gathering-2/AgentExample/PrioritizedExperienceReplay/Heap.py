@@ -107,4 +107,7 @@ def swim(self, priority):
         #Update pointer
         priority = parentPrio
         parentPrio = priority/2
+
+def getIndex(self, priority):
+    return self.p2i[priority+1]
     
