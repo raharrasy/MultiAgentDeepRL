@@ -6,6 +6,10 @@ def __init__(self, maxSize):
 	while multiplier <= self.maxSize:
 		self.maxDepth+=1
 		multiplier *= 2
+	initialize(maxSize)
+
+def getAllSum(self):
+        return self.root.getSum()
 
 def initialize(maxSize):
 	lst = [Node() for i in range(maxSize)]
@@ -24,7 +28,7 @@ def initialize(maxSize):
 		lst = buffer
 	
 
-def search(priority):
+def search(self,priority):
 	searchNode = self.root
 	steps = []
 	while searchNode.left or searchNode.right:
@@ -38,7 +42,7 @@ def search(priority):
 	multiplier = [2**(length-i-1) for i in range(length)]
 	return sum([i*j for (i, j) in zip(steps, multiplier)])
 
-def insert(priorityDiff, index):
+def insert(self,priorityDiff, index):
 	initial = "{0:b}".format(index)
 	adder = "0" * (self.maxDepth-len(initial))
 	searchString = adder+initial
