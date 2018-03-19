@@ -1,40 +1,39 @@
 import pygame
 import random
-import numpy as np
-import tensorflow as tf
 from random import randint
 from random import random
+import numpy as np
 from DQN import ConvNet
 from ExperienceBuffer import ExperienceBuffer
 
-
-class Player(object) :
-	def __init__(self,x,y,color = (0,255,0), dead_period = 10, health = 2, batchSize=50, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN"):
+class Food(object):
+	def __init__(self,x,y,color = (255,0,0), dead_period = 15, updateIteration = 50, batchSize=200, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN"):
+		# Ensure that all inputs have been multiplied by 10 beforehand.
 		self.x = x
 		self.y = y
-		self.color = color		
-		self.maxHealth = health
+		self.color = color
 		self.action_num = 0
 		self.orientation = 0
-		self.beam = []
+		self.is_dead = False
 		self.dead_period = dead_period
 		self.remaining_time = 0
-		self.health = 2
-		self.ExperienceBuffer = ExperienceBuffer()
+		self.prevState = None
+		self.curState = None
+		self.playerLastPoint = 0
 		self.point = 0
 		self.batchSize = batchSize
-		self.is_dead = False
 		self.prevState = np.zeros((1,32,42,4))
 		self.curState = np.zeros((1,32,42,4))
-		self.playerLastPoint = 0
 		self.NN = ConvNet()
+		self.ExperienceBuffer = ExperienceBuffer()
 		self.copyIteration = copyIteration
 		self.action_counter = 0
 		self.epsilon = epsilon
 		self.discountRate = discountRate
-		self.numsOfShots = 0
 		self.mode = mode
-
+		self.preventLearning = False
+		self.updateIteration = updateIteration
+		#self.filename = filename
 
 	def reset(self,location):
 		self.x = location[0]
@@ -42,19 +41,17 @@ class Player(object) :
 		self.action_num = 0
 		self.point = 0
 		self.remaining_time = 0
-		self.health = 2
 		self.is_dead = False
 		self.orientation = 0
 		self.prevState = None
 		self.curState = None
-		self.numsOfShots = 0
 		self.playerLastPoint = 0
 		self.prevState = np.zeros((1,32,42,4))
 		self.curState = np.zeros((1,32,42,4))
 
-	def add_player_point(self, point):
-		self.playerLastPoint = point
+	def add_point(self, point):
 		self.point += point
+		self.playerLastPoint = point
 	
 	def setIndex(self,newPosition):
 		self.x = newPosition[0]
@@ -63,24 +60,39 @@ class Player(object) :
 	def getIndex(self):
 		return (self.x,self.y)
 
+	def setAlive(self):
+		self.is_dead = False
+		self.preventLearning = False
+	
 	def setDead(self):
-		self.health -= 1
-		if self.health == 0:
-			self.is_dead = True
-			self.remaining_time = self.dead_period
+		self.is_dead = True
+		self.remaining_time = self.dead_period
 	
 	def getRemainingTime(self):
 		return self.remaining_time
 	
-	def setAlive(self):
-		if self.remaining_time == 0 and self.is_dead:
-			self.is_dead = False
-			self.health = self.maxHealth
-	
 	def isDead(self):
 		return self.is_dead
 
-	def sense(self,RGBMatrix, sight_radius, ExperienceFlag):
+	def act(self):
+		if not self.is_dead:
+			self.action_counter += 1
+		taken_action = randint(0,6)
+		randomVal = random()
+		if (not self.is_dead) and randomVal > self.epsilon:
+			a = self.NN.computeRes(self.curState)
+			maxVal = max(a[0])
+			maxIndexes = [i for i, j in enumerate(a[0]) if j == maxVal]
+			indexChosen = randint(0,len(maxIndexes)-1)
+			taken_action = maxIndexes[indexChosen]
+
+		if self.is_dead:
+			taken_action = 4
+		self.action_num = taken_action
+
+		return self.action_num
+
+	def sense(self,RGBMatrix,sight_radius,ExperienceFlag=False):		
 		RGBRep = None
 		if self.orientation == 3:
 			# Facing left
@@ -126,17 +138,16 @@ class Player(object) :
 		self.curState[0,:,:,2] = self.curState[0,:,:,3]
 		self.curState[0,:,:,3] = gray
 
-		if ExperienceFlag:
+		if ExperienceFlag and (not self.preventLearning):
 			self.ExperienceBuffer.insert((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState)))
+			if self.is_dead:
+				self.preventLearning = True
 
 	def learn(self):
-		if (self.action_counter % self.batchSize == 0) and (self.action_counter!=0):
-			#self.NN.copyNetwork()
-			#self.action_counter = 0
-			sampled_data = self.ExperienceBuffer.sample(50)
+		if (self.action_counter >= self.batchSize) and (self.action_counter % self.updateIteration == 0):
+			sampled_data = self.ExperienceBuffer.sample(self.batchSize)
 			dataset = np.asarray([a[0][0] for a in sampled_data])
 			dataset_pred = self.NN.computeRes(dataset)
-
 			if self.mode == "DQN":
 				predictionX = []
 				predictionY = []
@@ -158,7 +169,6 @@ class Player(object) :
 				dataY = np.asarray(predictionY)
 
 				self.NN.learn(dataX,dataY)
-
 			elif self.mode == "D-DQN":
 				predictionX = []
 				predictionY = []
@@ -192,28 +202,15 @@ class Player(object) :
 
 				self.NN.learn(dataX,dataY)
 
-		if (self.action_counter % self.copyIteration == 0) and (self.action_counter!=0):
-			self.NN.copyNetwork()		
+		if (self.action_counter % self.copyIteration == 0) and (self.action_counter>self.batchSize):
+			self.NN.copyNetwork()
 
-	def act(self):
-		self.action_counter += 1
-		taken_action = randint(0,7)
-		randomVal = random()
-		if randomVal > self.epsilon:
-			a = self.NN.computeRes(self.curState)
-			maxVal = max(a[0])
-			maxIndexes = [i for i, j in enumerate(a[0]) if j == maxVal]
-			indexChosen = randint(0,len(maxIndexes)-1)
-			taken_action = maxIndexes[indexChosen]
+	def save(self,filename):
+		self.NN.save(filename)
 
-		if self.is_dead:
-			taken_action = 7
-		self.action_num = taken_action
 
-		if taken_action == 4:
-			self.numsOfShots += 1
+	def checkpointing(self, filename):
+		self.NN.checkpointing(filename)
 
-		return self.action_num
-
-	def checkpointing(self, filename, step = 0):
-		self.NN.checkpointing(filename,step)
+	def checkpointing2(self, filename, step=0):
+		self.NN.checkpointing2(filename, step)

@@ -35,20 +35,21 @@ class Display(object) :
             rect = pygame.Rect(x,y,2,2)
             pygame.draw.rect(self.screen,(0,255,255),rect)
 
-        # draw opponent beams
-        for (x,y) in self.state.beamed_list:
-            rect = pygame.Rect(x+(self.sight_radius)*2,y+(self.sight_radius)*2,2,2)
-            pygame.draw.rect(self.screen,(255,0,255),rect)
+        # draw the obstacles prescribed by the map
+        for (x,y) in self.state.obstacleCoord:
+            rect = pygame.Rect(2*(self.sight_radius)+x,2*(self.sight_radius)+y,2,2)
+            pygame.draw.rect(self.screen,(0,255,255),rect)
 
         # draw player locations
 
         alive_players = [player for player in self.state.player_list]
         for player in alive_players:
-            rect = pygame.Rect(player.x+(self.sight_radius)*2,player.y+(self.sight_radius)*2,2,2)
+            rect = pygame.Rect(2*(self.sight_radius)+player.x,2*(self.sight_radius)+player.y,2,2)
             pygame.draw.rect(self.screen,player.color,rect)
 
         # draw food
 
         for food in self.state.food_list:
-            rect = pygame.Rect(food.x+(self.sight_radius)*2,food.y+(self.sight_radius)*2,2,2)
-            pygame.draw.rect(self.screen,food.color,rect)
+            if not food.is_dead:
+                rect = pygame.Rect(2*(self.sight_radius)+food.x,2*(self.sight_radius)+food.y,2,2)
+                pygame.draw.rect(self.screen,food.color,rect)

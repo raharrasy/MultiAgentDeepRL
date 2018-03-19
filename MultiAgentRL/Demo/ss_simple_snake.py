@@ -7,14 +7,15 @@ import numpy as np
 
 
 class Simulation(object):
-	def __init__(self,size,playerNum,maxFoodNum,sight_radius):
+	def __init__(self,size,playerNum,maxFoodNum,sight_radius, sight_sideways):
 		pygame.init()
 		self.size = size
 		self.playerNum = playerNum
 		self.maxFoodNum = maxFoodNum
 		self.sight_radius = sight_radius
+		self.sight_sideways = sight_sideways
 		self.screen = pygame.Surface((2*(size[0]+2*sight_radius),2*(size[1]+2*sight_radius)),0,32)
-		self.state = gameplay.State(self.sight_radius,self.playerNum,self.maxFoodNum,self.size)
+		self.state = gameplay.State(self.sight_sideways, self.sight_radius,self.playerNum,self.maxFoodNum,self.size)
 		self.display = Draw.Display(self.screen,self.state,self.sight_radius)
 		self.epsCounter = 0
 		self.clock = pygame.time.Clock()
@@ -63,7 +64,7 @@ class Simulation(object):
 
 
 if __name__ == '__main__':
-	app = Simulation((25,25),4,8,15)
+	app = Simulation((25,25),4,8,15, 21)
 	random_player_positions = sample(range(len(self.state.coordinate_pairs)), num_players)
 	coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
 	self.player_list = [player.Player(i,j) for (i,j) in coordinates]
