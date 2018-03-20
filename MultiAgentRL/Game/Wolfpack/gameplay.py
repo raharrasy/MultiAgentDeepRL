@@ -5,7 +5,8 @@ from food import Food
 import numpy as np
 
 class State(object) :
-		def __init__(self, sight_sideways, sight_radius,num_players, max_food_num, arena_size, levelMap, food_rate = 5, num_game_frames = 100000):
+		def __init__(self, sight_sideways, sight_radius,num_players, max_food_num, arena_size, levelMap, food_rate = 5, num_game_frames = 100000,
+                             coop_radius = 12, groupMultiplier = 2):
 			self.x_size = arena_size[0]
 			self.y_size = arena_size[1]
 			self.max_food_num = max_food_num
@@ -24,7 +25,9 @@ class State(object) :
 			self.remaining_game_frames = num_game_frames
 			self.sight_sideways = sight_sideways
 			self.sight_radius = sight_radius
+			self.coopRadius = coop_radius
 			self.wolfPerCapture = []
+			self.groupMultiplier = groupMultiplier
 			self.addFood()
 		
 		def reset(self,num_players,levelMap, food_rate = 5, num_game_frames = 100000):
@@ -300,14 +303,12 @@ class State(object) :
 					center = player.getIndex()
 					center = (center[0]+1, center[1]+1)
 					enumerated = enumerate(player_locations)
-					'''Replace 12 with any number, set this as param of simulation'''
-					close = [x for (x,(a,b)) in enumerated if abs(a-center[0]) + abs(b-center[1]) <= 12]
+					close = [x for (x,(a,b)) in enumerated if abs(a-center[0]) + abs(b-center[1]) <= self.coopRadius]
 					for x in close:
 						if len(close) < 2:
 							rewardListPlayer[x] += len(close)/4.0
 						else:
-                                                        """replace 2 with another const"""
-							rewardListPlayer[x] += 2*len(close)/4.0
+							rewardListPlayer[x] += self.groupMultiplier*len(close)/4.0
 					self.wolfPerCapture.append(len(close))
 					food_index = food_locations.index(player.getIndex())
 					self.food_list[food_id[food_index]].add_point(-1/4.0)
