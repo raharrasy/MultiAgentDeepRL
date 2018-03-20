@@ -36,7 +36,7 @@ class State(object) :
 			self.beamed_list = []
 
 			self.food_rate = food_rate
-			self.waiting_time = food_rate
+			self.waiting_time = self.food_rate
 			self.remaining_game_frames = num_game_frames
 		
 		def updateState(self):

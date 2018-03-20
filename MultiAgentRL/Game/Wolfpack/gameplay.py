@@ -329,9 +329,10 @@ class State(object) :
 				food_positions = sample(range(len(possibleCoordinates)), 1)
 				chosenCoordinate = possibleCoordinates[food_positions[0]]
 				self.food_list.append(Food(chosenCoordinate[0],chosenCoordinate[1]))
+				self.food_list[-1].NN.sess.graph.finalize()
 
-			for a in self.food_list:
-				a.NN.sess.graph.finalize()
+			#for a in self.food_list:
+			#	a.NN.sess.graph.finalize()
 
                 """
 		def saveWeights(self):
