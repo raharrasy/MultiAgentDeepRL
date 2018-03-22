@@ -2,13 +2,13 @@ from Buffer import Buffer
 from Heap import Heap
 import numpy as np
 
-class RankBasedExpReplay(object): 
+class ExperienceReplay(object): 
     def __init__(self,maxSize, alpha=0.6):
         self.maxSize = maxSize
         self.buffer = Buffer(self.maxSize)
         self.curSize = 0
 
-    def addExperience(self, experience, weight):
+    def addExperience(self, experience):
         self.buffer.insert(experience)
         self.curSize = min(self.curSize+1,self.maxSize)
 

@@ -1,10 +1,13 @@
 import tensorflow as tf
 
 class ConvNet(object): 
-	def __init__(self):
-		self.x = tf.placeholder(tf.float32, [None,32,42,4])
+	def __init__(self, initWidth, initHeight, initDepth):
+		self.initWidth = initWidth
+		self.initHeight = initHeight
+		self.initDepth = initDepth
+		self.x = tf.placeholder(tf.float32, [None,self.initWidth,self.initHeight,self.initDepth])
 		self.y = tf.placeholder(tf.float32, [None, 8])
-		self.x_target = tf.placeholder(tf.float32, [None,32,42,4])
+		self.x_target = tf.placeholder(tf.float32, [None,self.initWidth,self.initHeight,self.initDepth])
 
 		self.W1 = tf.Variable(tf.truncated_normal([8, 8, 4, 32],mean=0,stddev=0.02)) 
 		self.b1 = tf.Variable(tf.constant(0.05, shape=[32]))
@@ -23,8 +26,12 @@ class ConvNet(object):
 
 		k = 2
 		pool2 = tf.nn.max_pool(conv_3, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
+        
+		calculatedWidth = math.ceil(math.ceil(math.ceil(self.initWidth/2)/2)/2)
+		calculatedHeight = math.ceil(math.ceil(math.ceil(self.initHeight/2)/2)/2)
+		calculatedDepth = 64
 
-		self.W3 = tf.Variable(tf.truncated_normal([1536, 128],mean=0,stddev=0.02))
+		self.W3 = tf.Variable(tf.truncated_normal([calculatedWidth*calculatedHeight*calculatedDepth, 128],mean=0,stddev=0.02))
 		self.b3 = tf.Variable(tf.constant(0.05, shape=[128]))
 
 		self.W_out = tf.Variable(tf.truncated_normal([128, 8],mean=0,stddev=0.02)) 
@@ -74,7 +81,7 @@ class ConvNet(object):
 		self.b1_t_holder = tf.placeholder(tf.float32, [32])
 		self.W2_t_holder = tf.placeholder(tf.float32, [4, 4, 32, 64])
 		self.b2_t_holder = tf.placeholder(tf.float32, [64])
-		self.W3_t_holder = tf.placeholder(tf.float32, [1536, 128])
+		self.W3_t_holder = tf.placeholder(tf.float32, [calculatedWidth*calculatedHeight*calculatedDepth, 128])
 		self.b3_t_holder = tf.placeholder(tf.float32, [128])
 		self.W_out_t_holder = tf.placeholder(tf.float32, [128, 8])
 		self.b_out_t_holder = tf.placeholder(tf.float32, [8])
@@ -90,7 +97,7 @@ class ConvNet(object):
 
 		self.sess = tf.Session()
 		self.sess.run(tf.global_variables_initializer())
-		self.saver = tf.train.Saver(max_to_keep=210)
+		self.saver = tf.train.Saver(max_to_keep=500)
 
 	def computeRes(self,observation):
 		action_q_vals = self.sess.run(self.out, feed_dict={self.x: observation})

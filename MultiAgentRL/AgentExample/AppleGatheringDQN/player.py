@@ -4,14 +4,14 @@ import numpy as np
 from random import randint
 from random import random
 from DQN import ConvNet
-from ExperienceBuffer import ExperienceBuffer
+from ExperienceReplay.ExperienceReplay import ExperienceReplay
 
 
 class Player(object) :
 	def __init__(self,x,y,color = (0,255,0), dead_period = 10, health = 2, batchSize=50, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN", expDepth = 4, expWidth = 32, expHeight = 42):
 		self.x = x
 		self.y = y
-		self.color = color		
+		self.color = color
 		self.maxHealth = health
 		self.action_num = 0
 		self.orientation = 0
@@ -19,7 +19,7 @@ class Player(object) :
 		self.dead_period = dead_period
 		self.remaining_time = 0
 		self.health = 2
-		self.ExperienceBuffer = ExperienceBuffer()
+		self.ExperienceBuffer = ExperienceReplay()
 		self.point = 0
 		self.batchSize = batchSize
 		self.is_dead = False
@@ -28,7 +28,7 @@ class Player(object) :
 		self.prevState = np.zeros((1,self.expWidth,self.expHeight,self.expDepth))
 		self.curState = np.zeros((1,self.expWidth,self.expHeight,self.expDepth))
 		self.playerLastPoint = 0
-		self.NN = ConvNet()
+		self.NN = ConvNet(expWidth, expHeight, expDepth)
 		self.copyIteration = copyIteration
 		self.action_counter = 0
 		self.epsilon = epsilon
@@ -40,15 +40,13 @@ class Player(object) :
 
 	def reset(self,location):
 		self.x = location[0]
-		self.y = location[1]		
+		self.y = location[1]
 		self.action_num = 0
 		self.point = 0
 		self.remaining_time = 0
 		self.health = 2
 		self.is_dead = False
 		self.orientation = 0
-		self.prevState = None
-		self.curState = None
 		self.numsOfShots = 0
 		self.playerLastPoint = 0
 		self.prevState = np.zeros((1,self.expWidth,self.expHeight,self.expDepth))
@@ -92,12 +90,10 @@ class Player(object) :
 		self.curState[0,:,:,self.expDepth] = gray
 
 		if ExperienceFlag:
-			self.ExperienceBuffer.insert((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState)))
+			self.ExperienceBuffer.addExperience((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState)))
 
 	def learn(self):
 		if (self.action_counter % self.batchSize == 0) and (self.action_counter!=0):
-			#self.NN.copyNetwork()
-			#self.action_counter = 0
 			sampled_data = self.ExperienceBuffer.sample(self.batchSize)
 			dataset = np.asarray([a[0][0] for a in sampled_data])
 			dataset_pred = self.NN.computeRes(dataset)
@@ -158,7 +154,7 @@ class Player(object) :
 				self.NN.learn(dataX,dataY)
 
 		if (self.action_counter % self.copyIteration == 0) and (self.action_counter!=0):
-			self.NN.copyNetwork()		
+			self.NN.copyNetwork()
 
 	def act(self):
 		self.action_counter += 1
