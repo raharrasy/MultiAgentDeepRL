@@ -20,11 +20,20 @@ class WeightBasedExpReplay(object):
         self.weights[index] = weight
         self.sumTree.insert(diffWeight, index)
         self.curSize = min(self.curSize+1,self.maxSize)
+        
+    def modifyExperience(self, weight, index):
+        prevWeight = 0
+        if index in self.weights:
+            prevWeight = self.weights[index]
+        diffWeight = weight - prevWeight
+        self.weights[index] = weight
+        self.sumTree.insert(diffWeight,index)
 
     def sample(self, samplesAmount):
             startPoints = np.linspace(0,self.sumTree.getAllSum(),samplesAmount+1).tolist()
             expList = []
             weightList = []
+            indexList = []
             for a in range(0,len(startPoints)-1) :
                     start = startPoints[a]
                     end = startPoints[a+1]
@@ -32,6 +41,7 @@ class WeightBasedExpReplay(object):
                     retrIndex = self.sumTree.search(sampledNum)
                     expList.append(self.buffer.getItem(retrIndex))
                     weightList.append(self.weights[retrIndex]/self.sumTree.getAllSum())
+                    indexList.append(retrIndex)
 
-            return np.asarray(expList),np.asarray(weightList)
+            return np.asarray(expList),np.asarray(weightList),np.asarray(indexList)
         
