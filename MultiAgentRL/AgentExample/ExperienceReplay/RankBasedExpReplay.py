@@ -7,6 +7,7 @@ class RankBasedExpReplay(object):
         self.maxSize = maxSize
         self.buffer = Buffer(self.maxSize)
         self.heap = Heap()
+        self.weights = None
 
         #Add two flags to indicate whether alpha or queue size has changed
         self.prevAlpha = alpha
@@ -23,13 +24,18 @@ class RankBasedExpReplay(object):
         index = self.buffer.getPointer()
         self.buffer.insert(experience)
         self.heap.insert(index, weight)
+        self.curSize = self.heap.size
 
     def sample(self, samplesAmount):
 
         if (self.prevAlpha != self.alpha) or (self.prevSize != self.curSize) :
-                self.endPoints = computeBoundaries(self.alpha, self.curSize)
-
+                self.endPoints, self.weights = computeBoundaries(self.alpha, self.curSize)
+                self.prevAlpha = self.alpha
+                self.prevSize = self.curSize
+        totalWeights = sum(self.weights.tolist())
         startPoint = 0
+        expList = []
+        weightList = []
         for a in self.endPoints :
                 end = a + 1
                 diff = end - startPoint 
@@ -37,13 +43,13 @@ class RankBasedExpReplay(object):
                 retrIndex = startPoint + sampledNum
                 startPoint = end
                 expList.append(self.buffer.getItem(self.Heap.getIndex(retrIndex)))
-
-        return np.asarray(expList)
+                weightList.append(weightList[retrIndex]/totalWeights)
+        return np.asarray(expList),np.asarray(weightList)
 
     def computeBoundaries(alpha, curSize):
         ranks = list(range(samplesAmount))
         weights = [(1.0/rank+1)**self.alpha for rank in ranks]
-        sumAllWeights = sm(weights)
+        sumAllWeights = sum(weights)
         stops = np.linspace(0,sumAllWeights,curSize+1).tolist()
         del stops[0]
         curSum = 0
@@ -57,4 +63,4 @@ class RankBasedExpReplay(object):
                         results.append(curStop)
                         curFounded += 1
 
-        return results
+        return results, weights
