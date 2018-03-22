@@ -5,8 +5,8 @@ from food import Food
 import numpy as np
 
 class State(object) :
-		def __init__(self, sight_sideways, sight_radius,num_players, max_food_num, arena_size, levelMap, food_rate = 5, num_game_frames = 100000,
-                             coop_radius = 12, groupMultiplier = 2):
+		def __init__(self, sight_sideways, sight_radius,num_players, max_food_num, arena_size, levelMap, food_rate = 5, num_game_frames = 100000,coop_radius = 12, groupMultiplier = 2, obsMode = "PARTIAL"):
+			self.obsMode = obsMode
 			self.x_size = arena_size[0]
 			self.y_size = arena_size[1]
 			self.max_food_num = max_food_num
@@ -62,12 +62,19 @@ class State(object) :
 		
 		def sense(self,newRGB,ExperienceFlag=False):
 			self.RGBMatrix = newRGB
+			RGBObservation = None
 			for player in self.player_list:
-                                RGBObservation = self.computeObservation(self.RGBMatrix, player)
+				if self.obsMode == "PARTIAL":
+					RGBObservation = self.computeObservation(self.RGBMatrix, player)
+				else:
+					RGBObservation = self.computeFullObservation(self.RGBMatrix, player)
 				player.sense(RGBObservation,ExperienceFlag)
 
 			for food in self.food_list:
-                                RGBObservation = self.computeObservation(self.RGBMatrix, food)
+				if self.obsMode == "PARTIAL":
+					RGBObservation = self.computeObservation(self.RGBMatrix, food)
+				else:
+					RGBObservation = self.computeFullObservation(self.RGBMatrix, food)
 				food.sense(RGBObservation,ExperienceFlag)
 
 		def learn(self):
@@ -282,10 +289,6 @@ class State(object) :
 
 				return (x,y,new_orientation)
 
-			
-			
-
-		
 		def update_food_status(self,player_list):
 			for food in self.food_list:
 				food.add_point(0)
@@ -331,39 +334,6 @@ class State(object) :
 				self.food_list.append(Food(chosenCoordinate[0],chosenCoordinate[1]))
 				self.food_list[-1].NN.sess.graph.finalize()
 
-			#for a in self.food_list:
-			#	a.NN.sess.graph.finalize()
-
-                """
-		def saveWeights(self):
-			counter = 0
-			#save_path = saver.save(sess, "../tmp/Wolfpack/DDQN/Food")
-			suffix = "../tmp/Wolfpack/DDQN/Food"
-			prefix = ".ckpt"
-			for player in self.food_list:
-				player.save(suffix+str(counter)+prefix)
-				counter += 1
-			counter = 0
-			suffix = "../tmp/Wolfpack/DDQN/Player"
-			for player in self.player_list:
-				player.save(suffix+str(counter)+prefix)
-				counter += 1
-		"""
-                """
-		def checkpointing(self):
-			counter = 0
-			#save_path = saver.save(sess, "../tmp/Wolfpack/DDQN/Food")
-			suffix = "../tmp/checkpoint/Wolfpack/DDQN/Food"
-			prefix = ".ckpt"
-			for player in self.food_list:
-				player.checkpointing(suffix+str(counter)+prefix)
-				counter += 1
-			counter = 0
-			suffix = "../tmp/checkpoint/Wolfpack/DDQN/Player"
-			for player in self.player_list:
-				player.checkpointing(suffix+str(counter)+prefix)
-				counter += 1
-		"""
 
 		def setEpsilon(self,epsilon):
 			for player in self.player_list:
@@ -371,61 +341,70 @@ class State(object) :
 			for food in self.food_list:
 				food.epsilon = epsilon
 
-                """
-		def checkpointing2(self,step=0):
-			counter = 0
-			#save_path = saver.save(sess, "../tmp/Wolfpack/DDQN/Food")
-			suffix = "../tmp2/checkpoint/Wolfpack/DQN/Food"
-			prefix = ".ckpt"
-			for player in self.food_list:
-				player.checkpointing2(suffix+str(counter)+prefix,step)
-				counter += 1
-			counter = 0
-			suffix = "../tmp2/checkpoint/Wolfpack/DQN/Player"
-			for player in self.player_list:
-				player.checkpointing2(suffix+str(counter)+prefix,step)
-				counter += 1
-		"""
-
 
 		def setListOfPlayers(self, listOfPlayers):
                         self.player_list = listOfPlayers
 
-                def computeObservation(self, RGBMatrix, player):
-                    RGBRep = None
-                    if self.orientation == 3:
+		def computeObservation(self, RGBMatrix, player):
+			RGBRep = None
+			if self.orientation == 3:
 			# Facing left
-			x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			y_up = (player.y+(self.sight_radius)*2) - (2*self.sight_radius)
-			y_down = (player.y+(self.sight_radius)*2) + 2
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			RGBRep = RGBRep.transpose((1,0,2))
-			RGBRep = np.fliplr(RGBRep)
-                    elif self.orientation == 1:
-			# Facing right
-			x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			y_up = (player.y+(self.sight_radius)*2) + (2*self.sight_radius) + 2
-			y_down = (player.y+(self.sight_radius)*2)
-			RGBRep = RGBMatrix[x_left:x_right,y_down:y_up]
-			RGBRep = RGBRep.transpose((1,0,2))
-			RGBRep = RGBRep[::-1]
-                    elif self.orientation == 0:
-			# Facing up
-			x_left = (player.x+(self.sight_radius)*2) - (2*self.sight_radius)
-			x_right = (player.x+ (self.sight_radius)*2) + 2
-			y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-                    elif self.orientation == 2:
-			# Facing down
-			x_left = (player.x+(self.sight_radius)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + (2*self.sight_radius) + 2
-			y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			RGBRep = np.fliplr(RGBRep)
-			RGBRep = RGBRep[::-1]
+				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				y_up = (player.y+(self.sight_radius)*2) - (2*self.sight_radius)
+				y_down = (player.y+(self.sight_radius)*2) + 2
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = np.fliplr(RGBRep)
+			elif self.orientation == 1:
+				# Facing right
+				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				y_up = (player.y+(self.sight_radius)*2) + (2*self.sight_radius) + 2
+				y_down = (player.y+(self.sight_radius)*2)
+				RGBRep = RGBMatrix[x_left:x_right,y_down:y_up]
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = RGBRep[::-1]
+			elif self.orientation == 0:
+				# Facing up
+				x_left = (player.x+(self.sight_radius)*2) - (2*self.sight_radius)
+				x_right = (player.x+ (self.sight_radius)*2) + 2
+				y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+			elif self.orientation == 2:
+				# Facing down
+				x_left = (player.x+(self.sight_radius)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + (2*self.sight_radius) + 2
+				y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+				RGBRep = np.fliplr(RGBRep)
+				RGBRep = RGBRep[::-1]
 
-		    return RGBRep
+			return RGBRep
+        
+		def computeFullObservation(self, RGBMatrix, player):
+			RGBRep = None
+			x_left = (self.sight_radius)*2
+			x_right = -(self.sight_radius)*2 
+			y_up = 2*self.sight_radius
+			y_down = -2*self.sight_radius
+			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+			if self.orientation == 3:
+				# Facing left
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = np.fliplr(RGBRep)
+			elif self.orientation == 1:
+				# Facing right
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = RGBRep[::-1]
+			elif self.orientation == 0:
+				# Facing up                
+				RGBRep = RGBRep
+			elif self.orientation == 2:
+				# Facing down
+				RGBRep = np.fliplr(RGBRep)
+				RGBRep = RGBRep[::-1]
+
+			return RGBRep

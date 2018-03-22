@@ -6,7 +6,8 @@ import player
 import food
 
 class State(object) :
-		def __init__(self, sight_sideways, sight_radius, num_players, max_food_num, arena_size, food_rate = 15, num_game_frames = 60000):
+		def __init__(self, sight_sideways, sight_radius, num_players, max_food_num, arena_size, food_rate = 15, num_game_frames = 60000,obsMode = "PARTIAL"):
+			self.obsMode = obsMode
 			self.x_size = arena_size[0]
 			self.y_size = arena_size[1]
 			self.max_food_num = max_food_num
@@ -57,11 +58,14 @@ class State(object) :
 
 		def sense(self,newRGB,ExperienceFlag=False):
 			self.RGBMatrix = newRGB
+			RGBObservation = None
 			for player in self.player_list:
-                                RGBObservation = self.computeObservation(self.RGBMatrix, player)
+				if self.obsMode == "PARTIAL":
+					RGBObservation = self.computeObservation(self.RGBMatrix, player)
+				else:
+					RGBObservation = self.computeFullObservation(self.RGBMatrix, player)
 				player.sense(RGBObservation,ExperienceFlag)
 
-		
 		def update_state(self,collectiveAct):
 			self.waiting_time -= 1
 			self.remaining_game_frames -= 1
@@ -78,7 +82,6 @@ class State(object) :
 			
 			#Calculate beam locations
 			beamed_locations = self.calculate_beamed_locations(collectiveAct,prev_player_orientation, prev_player_position)
-		
 			#Calculate player intersection
 			a, seen, result = post_player_position, set(), {}
 			for idx, item in enumerate(a):
@@ -97,10 +100,8 @@ class State(object) :
 					self.player_list[ii].setIndex(post_player_position[ii])
 				else:
 					self.player_list[ii].setIndex(prev_player_position[ii])
-						
 			# Calculate player points and food status
 			self.update_food_status(self.player_list)
-			
 			#Find players that were shot by beams
 			beamed_locations = [item for sublist in beamed_locations for item in sublist]
 			beamed_locations = set(beamed_locations)
@@ -158,9 +159,9 @@ class State(object) :
 					next_x -= 2
 
 				if (next_x< self.x_size*2-2) and (next_x>=2) and (next_y< self.y_size*2-2) and (next_y>= 2):
-				 	return (next_x,next_y,orientation)
+					return (next_x,next_y,orientation)
 				else:
-				 	return (x,y,orientation)
+					return (x,y,orientation)
 			#Step back
 			elif action == 2:
 				#Facing upwards
@@ -307,41 +308,66 @@ class State(object) :
 		def setListOfPlayers(self, listOfPlayers):
                         self.player_list = listOfPlayers
 
-                def computeObservation(self, RGBMatrix, player):
-                    RGBRep = None
-                    if self.orientation == 3:
+		def computeObservation(self, RGBMatrix, player):
+			RGBRep = None
+			if self.orientation == 3:
 			# Facing left
-			x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			y_up = (player.y+(self.sight_radius)*2) - (2*self.sight_radius)
-			y_down = (player.y+(self.sight_radius)*2) + 2
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			RGBRep = RGBRep.transpose((1,0,2))
-			RGBRep = np.fliplr(RGBRep)
-                    elif self.orientation == 1:
-			# Facing right
-			x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			y_up = (player.y+(self.sight_radius)*2) + (2*self.sight_radius) + 2
-			y_down = (player.y+(self.sight_radius)*2)
-			RGBRep = RGBMatrix[x_left:x_right,y_down:y_up]
-			RGBRep = RGBRep.transpose((1,0,2))
-			RGBRep = RGBRep[::-1]
-                    elif self.orientation == 0:
-			# Facing up
-			x_left = (player.x+(self.sight_radius)*2) - (2*self.sight_radius)
-			x_right = (player.x+ (self.sight_radius)*2) + 2
-			y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-                    elif self.orientation == 2:
-			# Facing down
-			x_left = (player.x+(self.sight_radius)*2)
-			x_right = (player.x+ (self.sight_radius)*2) + (2*self.sight_radius) + 2
-			y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
-			y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
-			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			RGBRep = np.fliplr(RGBRep)
-			RGBRep = RGBRep[::-1]
+				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				y_up = (player.y+(self.sight_radius)*2) - (2*self.sight_radius)
+				y_down = (player.y+(self.sight_radius)*2) + 2
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = np.fliplr(RGBRep)
+			elif self.orientation == 1:
+				# Facing right
+				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				y_up = (player.y+(self.sight_radius)*2) + (2*self.sight_radius) + 2
+				y_down = (player.y+(self.sight_radius)*2)
+				RGBRep = RGBMatrix[x_left:x_right,y_down:y_up]
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = RGBRep[::-1]
+			elif self.orientation == 0:
+				# Facing up
+				x_left = (player.x+(self.sight_radius)*2) - (2*self.sight_radius)
+				x_right = (player.x+ (self.sight_radius)*2) + 2
+				y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+			elif self.orientation == 2:
+				# Facing down
+				x_left = (player.x+(self.sight_radius)*2)
+				x_right = (player.x+ (self.sight_radius)*2) + (2*self.sight_radius) + 2
+				y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
+				y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
+				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+				RGBRep = np.fliplr(RGBRep)
+				RGBRep = RGBRep[::-1]
 
-		    return RGBRep
+			return RGBRep
+        
+		def computeFullObservation(self, RGBMatrix, player):
+			RGBRep = None
+			x_left = (self.sight_radius)*2
+			x_right = -(self.sight_radius)*2 
+			y_up = 2*self.sight_radius
+			y_down = -2*self.sight_radius
+			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
+			if self.orientation == 3:
+				# Facing left
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = np.fliplr(RGBRep)
+			elif self.orientation == 1:
+				# Facing right
+				RGBRep = RGBRep.transpose((1,0,2))
+				RGBRep = RGBRep[::-1]
+			elif self.orientation == 0:
+				# Facing up                
+				RGBRep = RGBRep
+			elif self.orientation == 2:
+				# Facing down
+				RGBRep = np.fliplr(RGBRep)
+				RGBRep = RGBRep[::-1]
+
+			return RGBRep
