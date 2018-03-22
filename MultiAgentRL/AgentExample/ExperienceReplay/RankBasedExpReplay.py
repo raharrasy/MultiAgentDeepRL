@@ -23,9 +23,13 @@ class RankBasedExpReplay(object):
     def addExperience(self, experience, weight):
         index = self.buffer.getPointer()
         self.buffer.insert(experience)
-        self.heap.insert(index, weight)
+        self.heap.add(index, weight)
         self.curSize = self.heap.size
-
+        
+    def modifyExperience(self, weight, index):
+        self.heap.add(index, weight)
+        self.curSize = self.heap.size
+        
     def sample(self, samplesAmount):
 
         if (self.prevAlpha != self.alpha) or (self.prevSize != self.curSize) :
@@ -36,6 +40,7 @@ class RankBasedExpReplay(object):
         startPoint = 0
         expList = []
         weightList = []
+        indexList = []
         for a in self.endPoints :
                 end = a + 1
                 diff = end - startPoint 
@@ -44,7 +49,8 @@ class RankBasedExpReplay(object):
                 startPoint = end
                 expList.append(self.buffer.getItem(self.Heap.getIndex(retrIndex)))
                 weightList.append(weightList[retrIndex]/totalWeights)
-        return np.asarray(expList),np.asarray(weightList)
+                indexList.append(retrIndex)
+        return np.asarray(expList),np.asarray(weightList),np.asarray(indexList)
 
     def computeBoundaries(alpha, curSize):
         ranks = list(range(samplesAmount))
