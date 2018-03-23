@@ -178,3 +178,14 @@ class Player(object) :
 
 	def checkpointing(self, filename, step = 0):
 		self.NN.checkpointing(filename,step)
+        
+	def printPlayerParams(self):
+		println("Player Maximum Health : "+str(self.maxHealth))
+		println("Freeze Intervals : "+str(self.dead_period))
+		println("Training Batch Size : "+str(self.batchSize))
+		println("Target Network Copy Intervals : "+str(self.copyIteration))
+		println("Player Maximum Health : "+str(self.maxHealth))
+		println("Discount Rate : "+str(self.discountRate))
+		println("Used Algorithm : "+str(self.mode))
+		println("Experience Depth : "+str(self.expDepth))
+		println("--------------------------------------------")

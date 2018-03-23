@@ -10,11 +10,9 @@ class State(object) :
 			self.obsMode = obsMode
 			self.x_size = arena_size[0]
 			self.y_size = arena_size[1]
+			self.num_players = num_players            
 			self.max_food_num = max_food_num
 			self.coordinate_pairs = [(i*2,j*2) for i in range(1,arena_size[0]-1) for j in range(1,arena_size[1]-1)]
-			#random_player_positions = sample(range(len(self.coordinate_pairs)), num_players)
-			#coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
-			#self.player_list = [player.Player(i,j) for (i,j) in coordinates]
 			self.player_list = []
 			self.food_list = []
 			self.beamed_list = []
@@ -229,28 +227,6 @@ class State(object) :
 				return (x,y,new_orientation)
 			else:
 				return (x,y,orientation)
-
-			# if action != 4 and action != -1:
-			# 	if action == 1:
-			# 		next_x = x
-			# 		next_y = y+10
-			# 	elif action == 2:
-			# 		next_x = x-10
-			# 		next_y = y
-			# 	elif action == 3:
-			# 		next_x = x+10
-			# 		next_y = y
-			# 	else:
-			# 		next_x = x
-			# 		next_y = y-10
-			# else:
-			# 	next_x = x
-			# 	next_y = y
-
-			# if (next_x< self.x_size*10-10) and (next_x>=10) and (next_y< self.y_size*10-10) and (next_y>= 10):
-			# 	return (next_x,next_y)
-			# else:
-			# 	return (x,y)
 			
 
 		
@@ -371,3 +347,15 @@ class State(object) :
 				RGBRep = RGBRep[::-1]
 
 			return RGBRep
+ 
+		def printGameStatistics(self):
+			println("GAME PARAMETERS")
+			println("Game Size X : "+str(self.x_size))
+			println("Game Size Y : "+str(self.y_size))
+			println("Number Of Players : "+str(self.num_players))
+			println("Amount of Food : "+str(app.max_food_num))
+			println("Interval Between Food Respawn : "+str(self.food_rate))
+			println("Frames in one episode : "+str(self.num_game_frames))
+			if app.mode == "PARTIAL":
+			println("Observation Size Y (PARTIAL MODE) : "+str(app.sight_radius))
+			println("Observation Size X (PARTIAL MODE) : "+str(app.sight_sideways))

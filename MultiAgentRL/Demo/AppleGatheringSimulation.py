@@ -7,15 +7,16 @@ import numpy as np
 
 
 class Simulation(object):
-	def __init__(self,size,playerNum,maxFoodNum,sight_radius, sight_sideways):
+	def __init__(self,size,playerNum,maxFoodNum,sight_radius, sight_sideways, mode):
 		pygame.init()
 		self.size = size
+		self.simulationMode = mode
 		self.playerNum = playerNum
 		self.maxFoodNum = maxFoodNum
 		self.sight_radius = sight_radius
 		self.sight_sideways = sight_sideways
 		self.screen = pygame.Surface((2*(size[0]+2*sight_radius),2*(size[1]+2*sight_radius)),0,32)
-		self.state = gameplay.State(self.sight_sideways, self.sight_radius,self.playerNum,self.maxFoodNum,self.size)
+		self.state = gameplay.State(self.sight_sideways, self.sight_radius,self.playerNum,self.maxFoodNum,self.size,obsMode=mode)
 		self.display = Draw.Display(self.screen,self.state,self.sight_radius)
 		self.epsCounter = 0
 		self.clock = pygame.time.Clock()
@@ -51,21 +52,25 @@ class Simulation(object):
 			if self.epsCounter > 200:
 				break
 
-	def checkpointing(self):
-			counter = 0
-			suffix = "../tmp/Apple/DDQN/Player"
-			prefix = ".ckpt"
-			for player in self.state.player_list:
-				player.checkpointing(suffix+str(counter)+prefix)
-				counter += 1
+	def checkpointing(self,step):
+		counter = 0
+		suffix = "../tmp/Apple/DQN1/Player"
+		prefix = ".ckpt"
+		for player in self.state.player_list:
+			player.checkpointing(suffix+str(counter)+prefix, step)
+			counter += 1
 
 	def setAgentsList(self,listOfPlayers):
-                self.state.setListOfPlayers(listOfPlayers)
+		self.state.setListOfPlayers(listOfPlayers)
 
 
 if __name__ == '__main__':
-	app = Simulation((25,25),4,8,15, 21)
-	random_player_positions = sample(range(len(self.state.coordinate_pairs)), num_players)
-	coordinates = [self.coordinate_pairs[ii] for ii in random_player_positions]
-	self.player_list = [player.Player(i,j) for (i,j) in coordinates]
+	app = Simulation((25,25),4,2,15, 21, "FULL")
+	app.printGameStatistics()
+	random_player_positions = sample(range(len(app.state.coordinate_pairs)), num_players)
+	coordinates = [app.state.coordinate_pairs[ii] for ii in random_player_positions]
+	player_list = [player.Player(i,j) for (i,j) in coordinates]
+	self.app.setListOfPlayers(player_list)
+	for playr in player_list:
+		playr.printPlayerParams()    
 	app.run()
