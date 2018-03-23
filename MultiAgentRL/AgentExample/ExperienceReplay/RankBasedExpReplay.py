@@ -70,3 +70,16 @@ class RankBasedExpReplay(object):
                         curFounded += 1
 
         return results, weights
+    
+    def rebalance(self):
+        indexList = []
+        weightList = []
+        while self.heap.size != 0:
+            maxIndex = self.heap.p2i[1]
+            maxWeight = self.heap.p2w[1]
+            indexList.append(maxIndex)
+            weightList.append(maxWeight)
+            self.heap.delete(maxIndex)
+        for a in range(len(indexList)):
+            self.add(indexList[a],weightList[a])
+            
