@@ -33,7 +33,9 @@ class Simulation(object):
 			self.screen.fill((0,0,0))
 			self.state.updateState()
 			self.display.drawState()
-			self.state.sense(np.asarray(pygame.surfarray.array3d(self.screen)),True)
+			if self.state.remaining_game_frames == 0:
+				self.state.sense(np.asarray(pygame.surfarray.array3d(self.screen)), ExperienceFlag=True, LastExperienceFlag=True)
+			self.state.sense(np.asarray(pygame.surfarray.array3d(self.screen)), ExperienceFlag=True)
 			self.state.learn()
 			self.playerTimer = 0
 			if self.state.remaining_game_frames == 0:

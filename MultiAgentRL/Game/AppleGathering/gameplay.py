@@ -54,7 +54,7 @@ class State(object) :
 			for player in self.player_list:
 				player.setAlive()
 
-		def sense(self,newRGB,ExperienceFlag=False):
+		def sense(self,newRGB,ExperienceFlag=False, LastExperienceFlag = False):
 			self.RGBMatrix = newRGB
 			RGBObservation = None
 			for player in self.player_list:

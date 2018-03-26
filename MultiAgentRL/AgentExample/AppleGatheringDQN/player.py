@@ -80,7 +80,7 @@ class Player(object) :
 	def isDead(self):
 		return self.is_dead
 
-	def sense(self,RGBMatrix,ExperienceFlag):
+	def sense(self,RGBMatrix,ExperienceFlag, LastExpFlag):
 		r, g, b = RGBMatrix[:,:,0], RGBMatrix[:,:,1], RGBMatrix[:,:,2]
 		gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
 
@@ -90,7 +90,7 @@ class Player(object) :
 		self.curState[0,:,:,self.expDepth] = gray
 
 		if ExperienceFlag:
-			self.ExperienceBuffer.addExperience((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState)))
+			self.ExperienceBuffer.addExperience((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState),LastExpFlag))
 
 	def learn(self):
 		if (self.action_counter % self.batchSize == 0) and (self.action_counter!=0):
