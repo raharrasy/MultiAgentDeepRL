@@ -1,8 +1,8 @@
 import pygame
-from AgentExample import player
-from AppleGatheringGame import gameplay
-from AppleGatheringGame import Draw
-from AppleGatheringGame import food
+import player
+import gameplay
+import Draw
+import food
 import numpy as np
 
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 	app.printGameStatistics()
 	random_player_positions = sample(range(len(app.state.coordinate_pairs)), num_players)
 	coordinates = [app.state.coordinate_pairs[ii] for ii in random_player_positions]
-	player_list = [player.Player(i,j) for (i,j) in coordinates]
+	player_list = [player.Player(i,j,mode = "DQN",expWidth = 50, expHeight = 50) for (i,j) in coordinates]
 	self.app.setListOfPlayers(player_list)
 	for playr in player_list:
 		playr.printPlayerParams()    

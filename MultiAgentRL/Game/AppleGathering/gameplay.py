@@ -353,9 +353,12 @@ class State(object) :
 			println("Game Size X : "+str(self.x_size))
 			println("Game Size Y : "+str(self.y_size))
 			println("Number Of Players : "+str(self.num_players))
-			println("Amount of Food : "+str(app.max_food_num))
+			println("Amount of Food : "+str(self.max_food_num))
 			println("Interval Between Food Respawn : "+str(self.food_rate))
 			println("Frames in one episode : "+str(self.num_game_frames))
 			if app.mode == "PARTIAL":
-			println("Observation Size Y (PARTIAL MODE) : "+str(app.sight_radius))
-			println("Observation Size X (PARTIAL MODE) : "+str(app.sight_sideways))
+				println("Observation Size Y (PARTIAL MODE) : "+str(self.sight_radius))
+				println("Observation Size X (PARTIAL MODE) : "+str(self.sight_sideways))
+			else:
+				println("Observation Size Y (PARTIAL MODE) : "+str(self.x_size))
+				println("Observation Size X (PARTIAL MODE) : "+str(self.y_size))

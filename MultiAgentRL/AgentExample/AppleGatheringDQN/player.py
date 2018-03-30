@@ -5,22 +5,25 @@ from random import randint
 from random import random
 from DQN import ConvNet
 from ExperienceReplay.ExperienceReplay import ExperienceReplay
+from ExperienceReplay.RankBasedExpReplay import RankBasedExpReplay
+from ExperienceReplay.WeightBasedExpReplay import WeightBasedExpReplay
 
 
 class Player(object) :
-	def __init__(self,x,y,color = (0,255,0), dead_period = 10, health = 2, batchSize=50, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN", expDepth = 4, expWidth = 32, expHeight = 42):
+	def __init__(self,x,y,color = (0,255,0), dead_period = 10, health = 2, batchSize=50, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN", expDepth = 4, expWidth = 32, expHeight = 42, bufferMaxSize = 100000, alpha = 0.6, beta = 0.8, learningRate = 0.00001, rebalanceFrequency = 60000, weightAdder = 0.00001):
 		self.x = x
 		self.y = y
 		self.color = color
 		self.maxHealth = health
+		self.mode = mode
 		self.action_num = 0
 		self.orientation = 0
 		self.beam = []
 		self.dead_period = dead_period
 		self.remaining_time = 0
 		self.health = 2
-		self.ExperienceBuffer = ExperienceReplay()
 		self.point = 0
+		self.maxSize = bufferMaxSize
 		self.batchSize = batchSize
 		self.is_dead = False
 		self.expWidth = expWidth
@@ -34,8 +37,26 @@ class Player(object) :
 		self.epsilon = epsilon
 		self.discountRate = discountRate
 		self.numsOfShots = 0
-		self.mode = mode
 		self.expDepth = expDepth
+		self.alpha = 0
+		self.beta = 0
+		self.rebalanceFrequency = None
+		self.weightAdder = None
+		if "RankExpReplay" in self.mode:
+			self.alpha = alpha
+			self.beta = beta
+			self.rebalanceFrequency = rebalanceFrequency
+			self.ExperienceBuffer = RankBasedExpReplay(self.maxSize, self.alpha)
+		elif "WeightExpReplay" in self.mode:
+			self.alpha = alpha
+			self.beta = beta
+			if "RUQL-Weight" in self.mode:
+				weightAdder = 0
+				self.alpha = 1
+			self.weightAdder = weightAdder            
+			self.ExperienceBuffer = WeightBasedExpReplay(self.maxSize, self.alpha, self.epsilon)
+		else:
+			self.ExperienceBuffer = ExperienceReplay(self.maxSize)
 
 
 	def reset(self,location):
@@ -93,68 +114,35 @@ class Player(object) :
 			self.ExperienceBuffer.addExperience((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState),LastExpFlag))
 
 	def learn(self):
-		if (self.action_counter % self.batchSize == 0) and (self.action_counter!=0):
-			sampled_data = self.ExperienceBuffer.sample(self.batchSize)
+		if (self.action_counter % self.batchSize == 0) and (self.action_counter>=self.batchSize):
+			sampled_data, samplingWeights, indexList = self.ExperienceBuffer.sample(self.batchSize)
 			dataset = np.asarray([a[0][0] for a in sampled_data])
-			dataset_pred = self.NN.computeRes(dataset)
-
-			if self.mode == "DQN":
-				predictionX = []
-				predictionY = []
-				rewardList = [a[2] for a in sampled_data]
-				predData = np.asarray([a[3][0] for a in sampled_data])
-				resPred = self.NN.targetCompute(predData)
-				addition = [self.discountRate*max(a) for a in resPred]
-				res = [c+d for (c,d) in zip(rewardList,addition)]
-				
-
-				for ii in range(self.batchSize):
-					data = sampled_data[ii]
-					initPred = dataset_pred[ii]
-					initPred[data[1]] = res[ii]
-					predictionX.append(data[0][0])
-					predictionY.append(initPred)
-
-				dataX = np.asarray(predictionX)
-				dataY = np.asarray(predictionY)
-
-				self.NN.learn(dataX,dataY)
-
-			elif self.mode == "D-DQN":
-				predictionX = []
-				predictionY = []
-				rewardList = [a[2] for a in sampled_data]
-				predData = np.asarray([a[3][0] for a in sampled_data])
-				detMax = self.NN.computeRes(predData)
-				reservoir = []
-				for ii in range(self.batchSize):
-					eval_res = detMax[ii]
-					max_eval = max(eval_res)
-					idxMax = [idx for idx,val in enumerate(eval_res) if val == max_eval]
-					indexChosen = randint(0,len(idxMax)-1)
-					taken_action = idxMax[indexChosen]
-					reservoir.append(taken_action)
-
-				targetVal = self.NN.targetCompute(predData)
-				addition = []
-				for ii in range(self.batchSize):
-					addition.append(self.discountRate*targetVal[ii][reservoir[ii]])
-				res = [c+d for (c,d) in zip(rewardList,addition)]
-
-				for ii in range(self.batchSize):
-					data = sampled_data[ii]
-					initPred = dataset_pred[ii]
-					initPred[data[1]] = res[ii]
-					predictionX.append(data[0][0])
-					predictionY.append(initPred)
-
-				dataX = np.asarray(predictionX)
-				dataY = np.asarray(predictionY)
-
-				self.NN.learn(dataX,dataY)
+			predictionX = []
+			predictionY = []
+			takenActions = [a[1] for a in sampled_data]
+			rewardList = [a[2] for a in sampled_data]
+			nextStates = np.asarray([a[3][0] for a in sampled_data])
+			endFlags = [a[4] for a in sampled_data]
+			dataX, dataY, predictionDifference, probPicked = self.targetCalculation(nextStates, endFlags, takenActions)
+			learningWeights = self.weightCalculation(sampled_data)
+			if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):            
+				self.modifyPriorities(predictionDifference, probPicked, indexList)
+			self.NN.learn(dataX,dataY, learningWeights)
 
 		if (self.action_counter % self.copyIteration == 0) and (self.action_counter!=0):
 			self.NN.copyNetwork()
+        
+		if "RankExpReplay" in self.mode:
+			if (self.action_counter%self.rebalanceFrequency == 0) and (self.action_counter!=0):
+				self.ExperienceBuffer.rebalance()
+            
+	def modifyPriorities(self, predictionDifference, probPicked, indexes):
+		if "RUQL-Weight" in self.mode:
+			for a in len(indexes):
+				self.ExperienceBuffer.modifyExperience(probPicked[a], indexes[a])                
+		else:
+			for a in len(indexes):
+				self.ExperienceBuffer.modifyExperience(predictionDifference[a], indexes[a])
 
 	def act(self):
 		self.action_counter += 1
@@ -179,8 +167,70 @@ class Player(object) :
 	def checkpointing(self, filename, step = 0):
 		self.NN.checkpointing(filename,step)
         
+	def targetCalculation(self, nextStates, endFlags, takenActions):
+			dataset_pred = self.NN.computeRes(dataset)
+			res = []
+			addition = []      
+			if "D-DQN" in self.mode:
+				detMax = self.NN.computeRes(nextStates)
+				reservoir = []
+				for ii in range(self.batchSize):
+					eval_res = detMax[ii]
+					max_eval = max(eval_res)
+					idxMax = [idx for idx,val in enumerate(eval_res) if val == max_eval]
+					indexChosen = randint(0,len(idxMax)-1)
+					taken_action = idxMax[indexChosen]
+					reservoir.append(taken_action)
+				targetVal = self.NN.targetCompute(predData)
+				for ii in range(self.batchSize):
+					addition.append(self.discountRate*targetVal[ii][reservoir[ii]])
+			else:
+				resPred = self.NN.targetCompute(nextStates)
+				addition = [self.discountRate*max(a) for a in resPred]
+                
+			for a in range(len(addition)):
+				if endFlags[a] :
+					addition[a] = 0
+			res = [c+d for (c,d) in zip(rewardList,addition)]
+
+			predictionX = []
+			predictionY = []
+			predictionDifference = []
+			probPicked = []            
+			for ii in range(self.batchSize):
+				initPred = dataset_pred[ii]
+				diff = abs(res[ii] - initPred[takenActions[ii]])
+				maxPred = max(initPred)
+				maxIndexes = [a for (a,b) in enumerate(initPred) if b==maxPred]
+				prob = self.epsilon/len(initPred)
+				if takenActions[ii] in maxIndexes:
+					prob += (1.0-self.epsilon)/len(maxIndexes)
+				initPred[takenActions[ii]] = res[ii]
+				predictionX.append(data[0][0])
+				predictionY.append(initPred)
+				predictionDifference.append(diff)
+				probPicked.append(prob)
+
+			dataX = np.asarray(predictionX)
+			dataY = np.asarray(predictionY)
+			return dataX, dataY, predictionDifference, probPicked
+        
+	def weightCalculation(self, samplingWeights):
+		multiplier = None        
+		if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):
+			adjustor = self.size+0.0
+			w = np.power(samplingWeights * adjustor, -self.beta)
+			w_max = max(w)
+			w = np.divide(w, w_max)
+			multiplier = np.asarray([[math.sqrt(b*self.learningRate) for b in weights]])
+		else:
+			multiplier = np.asarray([[math.sqrt(self.learningRate) for b in weights]])
+		return multiplier
+
+        
 	def printPlayerParams(self):
 		println("Player Maximum Health : "+str(self.maxHealth))
+		println("Player Width And Height : "+str(self.expWidth)+", "+str(self.expHeight))        
 		println("Freeze Intervals : "+str(self.dead_period))
 		println("Training Batch Size : "+str(self.batchSize))
 		println("Target Network Copy Intervals : "+str(self.copyIteration))
@@ -188,4 +238,14 @@ class Player(object) :
 		println("Discount Rate : "+str(self.discountRate))
 		println("Used Algorithm : "+str(self.mode))
 		println("Experience Depth : "+str(self.expDepth))
+		println("Experience Replay Max Capacity : "+str(self.maxSize))
+		println("Learning Rate : "+str(self.learningRate))        
+		if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):
+			println("Initial alpha : "+str(self.alpha))
+			println("Initial beta : "+str(self.beta))
+		if ("WeightExpReplay" in self.mode):
+			println("Weight Adder : "+ str(self.weightAdder))
+		if ("RankExpReplay" in self.mode):
+			println("Rebalance intervals : "+ str(self.rebalanceFrequency)) 
 		println("--------------------------------------------")
+

@@ -16,4 +16,4 @@ class ExperienceReplay(object):
         sampledPoints = np.random.choice(self.curSize, samplesAmount, replace=False).tolist()
         for a in sampledPoints :
                 expList.append(self.buffer.getItem(a))
-        return np.asarray(expList)
+        return np.asarray(expList), None, None

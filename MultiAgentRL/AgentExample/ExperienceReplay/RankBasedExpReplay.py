@@ -1,6 +1,7 @@
 from Buffer import Buffer
 from Heap import Heap
 import numpy as np
+import sys
 
 class RankBasedExpReplay(object): 
     def __init__(self,maxSize, alpha=0.6):
@@ -20,9 +21,10 @@ class RankBasedExpReplay(object):
         #Weightings to each experience
         self.endPoints = []
 
-    def addExperience(self, experience, weight):
+    def addExperience(self, experience):
         index = self.buffer.getPointer()
         self.buffer.insert(experience)
+        weight = self.heap.getMaxPriority()
         self.heap.add(index, weight)
         self.curSize = self.heap.size
         
@@ -33,7 +35,7 @@ class RankBasedExpReplay(object):
     def sample(self, samplesAmount):
 
         if (self.prevAlpha != self.alpha) or (self.prevSize != self.curSize) :
-                self.endPoints, self.weights = computeBoundaries(self.alpha, self.curSize)
+                self.endPoints, self.weights = computeBoundaries(self.alpha, self.curSize, samplesAmount)
                 self.prevAlpha = self.alpha
                 self.prevSize = self.curSize
         totalWeights = sum(self.weights.tolist())
@@ -52,11 +54,11 @@ class RankBasedExpReplay(object):
                 indexList.append(retrIndex)
         return np.asarray(expList),np.asarray(weightList),np.asarray(indexList)
 
-    def computeBoundaries(alpha, curSize):
-        ranks = list(range(samplesAmount))
-        weights = [(1.0/rank+1)**self.alpha for rank in ranks]
+    def computeBoundaries(alpha, curSize, samplesAmount):
+        ranks = list(range(curSize))
+        weights = [(1.0/(rank+1))**self.alpha for rank in ranks]
         sumAllWeights = sum(weights)
-        stops = np.linspace(0,sumAllWeights,curSize+1).tolist()
+        stops = np.linspace(0,sumAllWeights,samplesAmount+1).tolist()
         del stops[0]
         curSum = 0
         curFounded = 0
@@ -82,4 +84,9 @@ class RankBasedExpReplay(object):
             self.heap.delete(maxIndex)
         for a in range(len(indexList)):
             self.add(indexList[a],weightList[a])
+            
+    def getMaxPriority(self):
+        if self.heap.size == 0:
+            return sys.float_info.max
+        return self.heap.p2w[1]
             

@@ -8,6 +8,7 @@ class ConvNet(object):
 		self.x = tf.placeholder(tf.float32, [None,self.initWidth,self.initHeight,self.initDepth])
 		self.y = tf.placeholder(tf.float32, [None, 8])
 		self.x_target = tf.placeholder(tf.float32, [None,self.initWidth,self.initHeight,self.initDepth])
+		self.weights =tf.placeholder(tf.float32,[None,1])
 
 		self.W1 = tf.Variable(tf.truncated_normal([8, 8, 4, 32],mean=0,stddev=0.02)) 
 		self.b1 = tf.Variable(tf.constant(0.05, shape=[32]))
@@ -43,15 +44,15 @@ class ConvNet(object):
 
 		self.out = tf.add(tf.matmul(local_out, self.W_out), self.b_out)
 
-		loss = tf.reduce_mean(tf.squared_difference(self.y,self.out))
-		self.train_op = tf.train.GradientDescentOptimizer(0.00001).minimize(loss)
+		loss = tf.reduce_sum(tf.squared_difference(tf.multiply(self.y,self.weights),tf.multiply(self.out,self.weights)))
+		self.train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
 
 		self.W1_target = tf.Variable(self.W1.initialized_value())
 		self.b1_target = tf.Variable(self.b1.initialized_value())
 		conv_target = tf.nn.conv2d(self.x_target, self.W1_target, strides=[1, 2, 2, 1], padding='SAME')
 		conv_with_b_target = tf.nn.bias_add(conv_target, self.b1_target)
 		conv_1_target = tf.nn.relu(conv_with_b_target) 
-		
+
 		k = 2
 		pool_target = tf.nn.max_pool(conv_1_target, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
 
@@ -104,21 +105,17 @@ class ConvNet(object):
 		return action_q_vals
 
 	def learn(self, data_batch_input, data_batch_output):
-		self.sess.run(self.train_op, feed_dict={self.x: data_batch_input, self.y: data_batch_output})
+		self.sess.run(self.train_op, feed_dict={self.x: data_batch_input, self.y: data_batch_output, self.weights: multiplier})
 
 	def targetCompute(self,observation):
 		action_q_vals = self.sess.run(self.out_target, feed_dict={self.x_target: observation})
 		return action_q_vals
 
 	def copyNetwork(self):
-			a,b,c,d,e,f,g,h = self.sess.run([self.W1,self.b1,self.W2,self.b2,self.W3,self.b3,self.W_out,self.b_out])
-			self.sess.run([self.w1_t_op,self.b1_t_op,self.w2_t_op,self.b2_t_op,self.w3_t_op,self.b3_t_op,self.w_out_t_op,self.b_out_t_op], feed_dict=
-			{self.W1_t_holder : a, self.b1_t_holder : b, self.W2_t_holder : c, self.b2_t_holder : d, self.W3_t_holder : e, self.b3_t_holder : f,
-			self.W_out_t_holder : g, self.b_out_t_holder :h})
-
-	def save(self, filename):
-		save_path = self.saver.save(self.sess, filename)
-		print("Model saved in file: %s" % save_path)
+		a,b,c,d,e,f,g,h = self.sess.run([self.W1,self.b1,self.W2,self.b2,self.W3,self.b3,self.W_out,self.b_out])
+		self.sess.run([self.w1_t_op,self.b1_t_op,self.w2_t_op,self.b2_t_op,self.w3_t_op,self.b3_t_op,self.w_out_t_op,self.b_out_t_op], feed_dict=
+		{self.W1_t_holder : a, self.b1_t_holder : b, self.W2_t_holder : c, self.b2_t_holder : d, self.W3_t_holder : e, self.b3_t_holder : f,
+		self.W_out_t_holder : g, self.b_out_t_holder :h})
 
 	def checkpointing(self, filename, step = 0):
-                save_path = self.saver.save(self.sess, filename, global_step = step)
+		save_path = self.saver.save(self.sess, filename, global_step = step)
