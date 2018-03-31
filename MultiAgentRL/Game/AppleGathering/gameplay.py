@@ -3,7 +3,7 @@ from random import sample
 import numpy as np
 import pygame
 import player
-import food
+from food import Food
 
 class State(object) :
 		def __init__(self, sight_sideways, sight_radius, num_players, max_food_num, arena_size, food_rate = 15, num_game_frames = 60000,obsMode = "PARTIAL"):
@@ -241,7 +241,7 @@ class State(object) :
 					player.add_player_point(0)
 
 			food_list = list(set_of_food_location)
-			self.food_list = [food.Food(a[0],a[1]) for a in food_list]
+			self.food_list = [Food(a[0],a[1]) for a in food_list]
 
 		
 		def update_status(self,beamed_locations):
@@ -275,7 +275,7 @@ class State(object) :
 				possibleCoordinates = list(set(possibleCoordinates) - set([(food.x,food.y) for food in self.food_list]))
 				food_positions = sample(range(len(possibleCoordinates)), 1)
 				chosenCoordinate = possibleCoordinates[food_positions[0]]
-				self.food_list.append(food.Food(chosenCoordinate[0],chosenCoordinate[1]))
+				self.food_list.append(Food(chosenCoordinate[0],chosenCoordinate[1]))
 
 		
 		def setEpsilon(self,epsilon):
