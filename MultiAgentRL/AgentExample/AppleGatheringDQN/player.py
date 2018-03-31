@@ -28,8 +28,8 @@ class Player(object) :
 		self.is_dead = False
 		self.expWidth = expWidth
 		self.expHeight = expHeight
-		self.prevState = np.zeros((1,self.expWidth,self.expHeight,self.expDepth))
-		self.curState = np.zeros((1,self.expWidth,self.expHeight,self.expDepth))
+		self.prevState = np.zeros((1,self.expWidth,self.expHeight,expDepth))
+		self.curState = np.zeros((1,self.expWidth,self.expHeight,expDepth))
 		self.playerLastPoint = 0
 		self.NN = ConvNet(expWidth, expHeight, expDepth)
 		self.copyIteration = copyIteration
