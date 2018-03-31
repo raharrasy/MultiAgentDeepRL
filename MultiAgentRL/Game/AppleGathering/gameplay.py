@@ -287,7 +287,7 @@ class State(object) :
 
 		def computeObservation(self, RGBMatrix, player):
 			RGBRep = None
-			if self.orientation == 3:
+			if player.orientation == 3:
 			# Facing left
 				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
 				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
@@ -296,7 +296,7 @@ class State(object) :
 				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
 				RGBRep = RGBRep.transpose((1,0,2))
 				RGBRep = np.fliplr(RGBRep)
-			elif self.orientation == 1:
+			elif player.orientation == 1:
 				# Facing right
 				x_left = (player.x+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
 				x_right = (player.x+ (self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
@@ -305,14 +305,14 @@ class State(object) :
 				RGBRep = RGBMatrix[x_left:x_right,y_down:y_up]
 				RGBRep = RGBRep.transpose((1,0,2))
 				RGBRep = RGBRep[::-1]
-			elif self.orientation == 0:
+			elif player.orientation == 0:
 				# Facing up
 				x_left = (player.x+(self.sight_radius)*2) - (2*self.sight_radius)
 				x_right = (player.x+ (self.sight_radius)*2) + 2
 				y_up = (player.y+(self.sight_radius)*2) - ((self.sight_sideways/2)*2)
 				y_down = (player.y+(self.sight_radius)*2) + ((self.sight_sideways/2)*2) + 2 
 				RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			elif self.orientation == 2:
+			elif player.orientation == 2:
 				# Facing down
 				x_left = (player.x+(self.sight_radius)*2)
 				x_right = (player.x+ (self.sight_radius)*2) + (2*self.sight_radius) + 2
@@ -331,18 +331,18 @@ class State(object) :
 			y_up = 2*self.sight_radius
 			y_down = -2*self.sight_radius
 			RGBRep = RGBMatrix[x_left:x_right,y_up:y_down]
-			if self.orientation == 3:
+			if player.orientation == 3:
 				# Facing left
 				RGBRep = RGBRep.transpose((1,0,2))
 				RGBRep = np.fliplr(RGBRep)
-			elif self.orientation == 1:
+			elif player.orientation == 1:
 				# Facing right
 				RGBRep = RGBRep.transpose((1,0,2))
 				RGBRep = RGBRep[::-1]
-			elif self.orientation == 0:
+			elif player.orientation == 0:
 				# Facing up                
 				RGBRep = RGBRep
-			elif self.orientation == 2:
+			elif player.orientation == 2:
 				# Facing down
 				RGBRep = np.fliplr(RGBRep)
 				RGBRep = RGBRep[::-1]
