@@ -42,6 +42,7 @@ class Player(object) :
 		self.beta = 0
 		self.rebalanceFrequency = None
 		self.weightAdder = None
+		self.learningRate = learningRate
 		if "RankExpReplay" in self.mode:
 			self.alpha = alpha
 			self.beta = beta
