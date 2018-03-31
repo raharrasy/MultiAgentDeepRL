@@ -63,7 +63,7 @@ class State(object) :
 					RGBObservation = self.computeObservation(self.RGBMatrix, player)
 				else:
 					RGBObservation = self.computeFullObservation(self.RGBMatrix, player)
-				player.sense(RGBObservation,ExperienceFlag)
+				player.sense(RGBObservation,ExperienceFlag, LastExperienceFlag)
 
 		def update_state(self,collectiveAct):
 			self.waiting_time -= 1
