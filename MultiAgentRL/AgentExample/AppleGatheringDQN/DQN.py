@@ -33,7 +33,7 @@ class ConvNet(object):
 		calculatedHeight = math.ceil(math.ceil(math.ceil(self.initHeight/2)/2)/2)
 		calculatedDepth = 64
 
-		self.W3 = tf.Variable(tf.truncated_normal([calculatedWidth*calculatedHeight*calculatedDepth, 128],mean=0,stddev=0.02))
+		self.W3 = tf.Variable(tf.truncated_normal([int(calculatedWidth*calculatedHeight*calculatedDepth), 128],mean=0,stddev=0.02))
 		self.b3 = tf.Variable(tf.constant(0.05, shape=[128]))
 
 		self.W_out = tf.Variable(tf.truncated_normal([128, 8],mean=0,stddev=0.02)) 
