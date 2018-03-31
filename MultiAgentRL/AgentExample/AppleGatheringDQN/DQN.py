@@ -1,4 +1,5 @@
 import tensorflow as tf
+import math
 
 class ConvNet(object): 
 	def __init__(self, initWidth, initHeight, initDepth):
