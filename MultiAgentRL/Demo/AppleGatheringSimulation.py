@@ -72,7 +72,7 @@ if __name__ == '__main__':
 	random_player_positions = sample(range(len(app.state.coordinate_pairs)), app.playerNum)
 	coordinates = [app.state.coordinate_pairs[ii] for ii in random_player_positions]
 	player_list = [player.Player(i,j,mode = "DQN",expWidth = 50, expHeight = 50) for (i,j) in coordinates]
-	app.setListOfPlayers(player_list)
-	for playr in app.player_list:
+	app.setAgentsList(player_list)
+	for playr in app.state.player_list:
 		playr.printPlayerParams()    
 	app.run()
