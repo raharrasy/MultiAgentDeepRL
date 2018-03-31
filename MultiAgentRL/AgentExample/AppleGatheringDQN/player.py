@@ -124,11 +124,11 @@ class Player(object) :
 			rewardList = [a[2] for a in sampled_data]
 			nextStates = np.asarray([a[3][0] for a in sampled_data])
 			endFlags = [a[4] for a in sampled_data]
-			dataX, dataY, predictionDifference, probPicked = self.targetCalculation(dataset, rewardList, nextStates, endFlags, takenActions)
+			dataY, predictionDifference, probPicked = self.targetCalculation(dataset, rewardList, nextStates, endFlags, takenActions)
 			learningWeights = self.weightCalculation(sampled_data)
 			if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):            
 				self.modifyPriorities(predictionDifference, probPicked, indexList)
-			self.NN.learn(dataX,dataY, learningWeights)
+			self.NN.learn(dataset,dataY, learningWeights)
 
 		if (self.action_counter % self.copyIteration == 0) and (self.action_counter!=0):
 			self.NN.copyNetwork()
@@ -194,7 +194,6 @@ class Player(object) :
 					addition[a] = 0
 			res = [c+d for (c,d) in zip(rewardList,addition)]
 
-			predictionX = []
 			predictionY = []
 			predictionDifference = []
 			probPicked = []            
@@ -207,14 +206,12 @@ class Player(object) :
 				if takenActions[ii] in maxIndexes:
 					prob += (1.0-self.epsilon)/len(maxIndexes)
 				initPred[takenActions[ii]] = res[ii]
-				predictionX.append(data[0][0])
 				predictionY.append(initPred)
 				predictionDifference.append(diff)
 				probPicked.append(prob)
 
-			dataX = np.asarray(predictionX)
 			dataY = np.asarray(predictionY)
-			return dataX, dataY, predictionDifference, probPicked
+			return dataY, predictionDifference, probPicked
         
 	def weightCalculation(self, samplingWeights):
 		multiplier = None        
