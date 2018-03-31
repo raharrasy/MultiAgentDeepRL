@@ -109,7 +109,7 @@ class Player(object) :
 		self.prevState = np.copy(self.curState)
 		for i in range(0,self.expDepth-1):
                         self.curState[0,:,:,i] = self.curState[0,:,:,i+1]
-		self.curState[0,:,:,self.expDepth] = gray
+		self.curState[0,:,:,self.expDepth-1] = gray
 
 		if ExperienceFlag:
 			self.ExperienceBuffer.addExperience((np.copy(self.prevState),self.action_num,self.playerLastPoint,np.copy(self.curState),LastExpFlag))
