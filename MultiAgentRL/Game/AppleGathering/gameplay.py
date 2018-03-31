@@ -18,6 +18,7 @@ class State(object) :
 			self.beamed_list = []
 			self.food_rate = food_rate
 			self.waiting_time = self.food_rate
+			self.perEpisodeFrame = num_game_frames            
 			self.remaining_game_frames = num_game_frames
 			self.sight_radius = sight_radius
 			self.sight_sideways = sight_sideways
@@ -36,7 +37,7 @@ class State(object) :
 
 			self.food_rate = food_rate
 			self.waiting_time = self.food_rate
-			self.remaining_game_frames = num_game_frames
+			self.remaining_game_frames = self.perEpisodeFrame
 		
 		def updateState(self):
 			collectiveAction = self.getCollectiveAct()
@@ -349,16 +350,16 @@ class State(object) :
 			return RGBRep
  
 		def printGameStatistics(self):
-			println("GAME PARAMETERS")
-			println("Game Size X : "+str(self.x_size))
-			println("Game Size Y : "+str(self.y_size))
-			println("Number Of Players : "+str(self.num_players))
-			println("Amount of Food : "+str(self.max_food_num))
-			println("Interval Between Food Respawn : "+str(self.food_rate))
-			println("Frames in one episode : "+str(self.num_game_frames))
-			if app.mode == "PARTIAL":
-				println("Observation Size Y (PARTIAL MODE) : "+str(self.sight_radius))
-				println("Observation Size X (PARTIAL MODE) : "+str(self.sight_sideways))
+			print("GAME PARAMETERS")
+			print("Game Size X : "+str(self.x_size))
+			print("Game Size Y : "+str(self.y_size))
+			print("Number Of Players : "+str(self.num_players))
+			print("Amount of Food : "+str(self.max_food_num))
+			print("Interval Between Food Respawn : "+str(self.food_rate))
+			print("Frames in one episode : "+str(self.perEpisodeFrame))
+			if self.obsMode == "PARTIAL":
+				print("Observation Size Y (PARTIAL MODE) : "+str(self.sight_radius))
+				print("Observation Size X (PARTIAL MODE) : "+str(self.sight_sideways))
 			else:
-				println("Observation Size Y (PARTIAL MODE) : "+str(self.x_size))
-				println("Observation Size X (PARTIAL MODE) : "+str(self.y_size))
+				print("Observation Size Y (PARTIAL MODE) : "+str(self.x_size))
+				print("Observation Size X (PARTIAL MODE) : "+str(self.y_size))

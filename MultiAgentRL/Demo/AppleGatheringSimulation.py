@@ -4,7 +4,7 @@ import gameplay
 import Draw
 import food
 import numpy as np
-
+from random import sample
 
 class Simulation(object):
 	def __init__(self,size,playerNum,maxFoodNum,sight_radius, sight_sideways, mode):
@@ -68,8 +68,8 @@ class Simulation(object):
 
 if __name__ == '__main__':
 	app = Simulation((25,25),4,2,15, 21, "FULL")
-	app.printGameStatistics()
-	random_player_positions = sample(range(len(app.state.coordinate_pairs)), num_players)
+	app.state.printGameStatistics()
+	random_player_positions = sample(range(len(app.state.coordinate_pairs)), app.playerNum)
 	coordinates = [app.state.coordinate_pairs[ii] for ii in random_player_positions]
 	player_list = [player.Player(i,j,mode = "DQN",expWidth = 50, expHeight = 50) for (i,j) in coordinates]
 	self.app.setListOfPlayers(player_list)

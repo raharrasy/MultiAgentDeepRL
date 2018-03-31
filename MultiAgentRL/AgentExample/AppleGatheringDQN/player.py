@@ -4,9 +4,9 @@ import numpy as np
 from random import randint
 from random import random
 from DQN import ConvNet
-from ExperienceReplay.ExperienceReplay import ExperienceReplay
-from ExperienceReplay.RankBasedExpReplay import RankBasedExpReplay
-from ExperienceReplay.WeightBasedExpReplay import WeightBasedExpReplay
+from ExperienceReplay import ExperienceReplay
+from RankBasedExpReplay import RankBasedExpReplay
+from WeightBasedExpReplay import WeightBasedExpReplay
 
 
 class Player(object) :
@@ -229,23 +229,23 @@ class Player(object) :
 
         
 	def printPlayerParams(self):
-		println("Player Maximum Health : "+str(self.maxHealth))
-		println("Player Width And Height : "+str(self.expWidth)+", "+str(self.expHeight))        
-		println("Freeze Intervals : "+str(self.dead_period))
-		println("Training Batch Size : "+str(self.batchSize))
-		println("Target Network Copy Intervals : "+str(self.copyIteration))
-		println("Player Maximum Health : "+str(self.maxHealth))
-		println("Discount Rate : "+str(self.discountRate))
-		println("Used Algorithm : "+str(self.mode))
-		println("Experience Depth : "+str(self.expDepth))
-		println("Experience Replay Max Capacity : "+str(self.maxSize))
-		println("Learning Rate : "+str(self.learningRate))        
+		print("Player Maximum Health : "+str(self.maxHealth))
+		print("Player Width And Height : "+str(self.expWidth)+", "+str(self.expHeight))        
+		print("Freeze Intervals : "+str(self.dead_period))
+		print("Training Batch Size : "+str(self.batchSize))
+		print("Target Network Copy Intervals : "+str(self.copyIteration))
+		print("Player Maximum Health : "+str(self.maxHealth))
+		print("Discount Rate : "+str(self.discountRate))
+		print("Used Algorithm : "+str(self.mode))
+		print("Experience Depth : "+str(self.expDepth))
+		print("Experience Replay Max Capacity : "+str(self.maxSize))
+		print("Learning Rate : "+str(self.learningRate))        
 		if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):
-			println("Initial alpha : "+str(self.alpha))
-			println("Initial beta : "+str(self.beta))
+			print("Initial alpha : "+str(self.alpha))
+			print("Initial beta : "+str(self.beta))
 		if ("WeightExpReplay" in self.mode):
-			println("Weight Adder : "+ str(self.weightAdder))
+			print("Weight Adder : "+ str(self.weightAdder))
 		if ("RankExpReplay" in self.mode):
-			println("Rebalance intervals : "+ str(self.rebalanceFrequency)) 
-		println("--------------------------------------------")
+			print("Rebalance intervals : "+ str(self.rebalanceFrequency)) 
+		print("--------------------------------------------")
 
