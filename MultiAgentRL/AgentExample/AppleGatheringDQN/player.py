@@ -124,7 +124,7 @@ class Player(object) :
 			rewardList = [a[2] for a in sampled_data]
 			nextStates = np.asarray([a[3][0] for a in sampled_data])
 			endFlags = [a[4] for a in sampled_data]
-			dataX, dataY, predictionDifference, probPicked = self.targetCalculation(nextStates, endFlags, takenActions)
+			dataX, dataY, predictionDifference, probPicked = self.targetCalculation(dataset, nextStates, endFlags, takenActions)
 			learningWeights = self.weightCalculation(sampled_data)
 			if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):            
 				self.modifyPriorities(predictionDifference, probPicked, indexList)
@@ -168,7 +168,7 @@ class Player(object) :
 	def checkpointing(self, filename, step = 0):
 		self.NN.checkpointing(filename,step)
         
-	def targetCalculation(self, nextStates, endFlags, takenActions):
+	def targetCalculation(self, dataset, nextStates, endFlags, takenActions):
 			dataset_pred = self.NN.computeRes(dataset)
 			res = []
 			addition = []      
