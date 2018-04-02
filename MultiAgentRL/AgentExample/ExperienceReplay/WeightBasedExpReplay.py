@@ -14,7 +14,8 @@ class WeightBasedExpReplay(object):
         self.epsilon = epsilon
         self.heap = Heap()
 
-    def addExperience(self, experience, weight):
+    def addExperience(self, experience):
+        weight = self.heap.getMaxPriority()
         weight = weight + self.epsilon
         weight = weight**self.alpha
         index = self.buffer.getPointer()
