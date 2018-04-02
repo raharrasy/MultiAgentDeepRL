@@ -6,9 +6,7 @@ class SumTree(object):
         self.root = initialize(maxSize)
         self.maxDepth = 0
         multiplier = 1
-        while multiplier <= self.maxSize:
-            self.maxDepth+=1
-            multiplier *= 2
+        self.maxDepth = int(math.ceil(math.log2(maxSize)))
 
     def getAllSum(self):
         return self.root.getSum()
@@ -57,16 +55,8 @@ def initialize(maxSize):
         lst.append(Node())
     while len(lst) > 1:
         buffer = []
-        for a in range((len(lst)//2)-1):
+        for a in range(len(lst)/2):
             aggr = Node(lst[2*a].getSum()+lst[2*a+1].getSum(),lst[2*a+1],lst[2*a])
-            buffer.append(aggr)
-            
-        a = (len(lst)//2) - 1
-        if len(lst) % 2 == 0:
-            aggr = Node(lst[2*a].getSum()+lst[2*a+1].getSum(),lst[2*a+1],lst[2*a])
-            buffer.append(aggr)
-        else:
-            aggr = Node(sum=lst[2*a].getSum(),left=lst[2*a])
             buffer.append(aggr)
 
         lst = buffer
