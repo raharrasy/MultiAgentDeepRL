@@ -223,7 +223,7 @@ class Player(object) :
 			multiplier = np.asarray([[math.sqrt(b*self.learningRate) for b in w]])
 		else:
 			multiplier = np.asarray([[math.sqrt(self.learningRate) for b in samplingWeights]])
-		return multiplier
+		return multiplier.T
 
         
 	def printPlayerParams(self):
