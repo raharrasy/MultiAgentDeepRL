@@ -18,5 +18,5 @@ class ExperienceReplay(object):
         weightList = []
         for a in sampledPoints :
                 expList.append(self.buffer.getItem(a))
-                weightList.append(1.0/len(samplesAmount))
+                weightList.append(1.0/samplesAmount)
         return np.asarray(expList), weightList, None
