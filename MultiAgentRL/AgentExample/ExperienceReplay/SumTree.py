@@ -55,7 +55,7 @@ def initialize(maxSize):
         lst.append(Node())
     while len(lst) > 1:
         buffer = []
-        for a in range(len(lst)/2):
+        for a in range(len(lst)//2):
             aggr = Node(lst[2*a].getSum()+lst[2*a+1].getSum(),lst[2*a+1],lst[2*a])
             buffer.append(aggr)
 
