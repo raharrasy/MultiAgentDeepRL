@@ -217,6 +217,8 @@ class Player(object) :
 		multiplier = None        
 		if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):
 			adjustor = self.ExperienceBuffer.curSize+0.0
+			print("Adjustor : "+str(adjustor))
+			print("samplingWeights : "+str(samplingWeights))
 			w = np.power(samplingWeights * adjustor, -self.beta)
 			w_max = max(w)
 			w = np.divide(w, w_max)

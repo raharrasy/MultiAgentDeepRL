@@ -54,9 +54,9 @@ class RankBasedExpReplay(object):
                 indexList.append(retrIndex)
         return np.asarray(expList),np.asarray(weightList),np.asarray(indexList)
 
-    def computeBoundaries(self, lpha, curSize, samplesAmount):
+    def computeBoundaries(self, alpha, curSize, samplesAmount):
         ranks = list(range(curSize))
-        weights = [(1.0/(rank+1))**self.alpha for rank in ranks]
+        weights = [(1.0/(rank+1))**alpha for rank in ranks]
         sumAllWeights = sum(weights)
         stops = np.linspace(0,sumAllWeights,samplesAmount+1).tolist()
         del stops[0]
