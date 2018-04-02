@@ -116,3 +116,6 @@ class Heap(object):
 
     def getIndex(self, priority):
         return self.p2i[priority+1]
+
+    def getMaxPriority(self):
+        return self.p2w[1]
