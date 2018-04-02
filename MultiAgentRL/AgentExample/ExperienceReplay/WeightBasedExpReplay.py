@@ -1,5 +1,6 @@
 from Buffer import Buffer
 from SumTree import SumTree
+from Heap import Heap
 import numpy as np
 
 class WeightBasedExpReplay(object):
