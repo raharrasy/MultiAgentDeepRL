@@ -121,4 +121,4 @@ class Heap(object):
         if self.size != 0:
             return self.p2w[1]
         else:
-            return self.p2w[0]
+            return 100

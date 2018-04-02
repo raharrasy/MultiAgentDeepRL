@@ -16,13 +16,9 @@ class WeightBasedExpReplay(object):
 
     def addExperience(self, experience):
         weight = self.heap.getMaxPriority()
-        weight = weight + self.epsilon
-        weight = weight**self.alpha
         index = self.buffer.getPointer()
         self.buffer.insert(experience)
         prevWeight = 0
-        if index in self.weights:
-            prevWeight = self.weights[index]
         diffWeight = weight - prevWeight
         self.weights[index] = weight
         self.sumTree.insert(diffWeight, index)
