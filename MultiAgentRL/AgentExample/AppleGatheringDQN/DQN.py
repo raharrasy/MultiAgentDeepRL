@@ -105,7 +105,7 @@ class ConvNet(object):
 		action_q_vals = self.sess.run(self.out, feed_dict={self.x: observation})
 		return action_q_vals
 
-	def learn(self, data_batch_input, data_batch_output):
+	def learn(self, data_batch_input, data_batch_output, multiplier):
 		self.sess.run(self.train_op, feed_dict={self.x: data_batch_input, self.y: data_batch_output, self.weights: multiplier})
 
 	def targetCompute(self,observation):
