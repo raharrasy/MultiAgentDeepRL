@@ -41,7 +41,7 @@ class WeightBasedExpReplay(object):
             expList = []
             weightList = []
             indexList = []
-            for a in range(0,len(startPoints)-1) :
+            for a in range(len(startPoints)-1) :
                     start = startPoints[a]
                     end = startPoints[a+1]
                     sampledNum = np.random.uniform(start,end)
