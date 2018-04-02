@@ -49,7 +49,7 @@ class RankBasedExpReplay(object):
                 sampledNum = np.random.randint(diff, size=1)[0]
                 retrIndex = startPoint + sampledNum
                 startPoint = end
-                expList.append(self.buffer.getItem(self.Heap.getIndex(retrIndex)))
+                expList.append(self.buffer.getItem(self.heap.getIndex(retrIndex)))
                 weightList.append(weightList[retrIndex]/totalWeights)
                 indexList.append(retrIndex)
         return np.asarray(expList),np.asarray(weightList),np.asarray(indexList)
