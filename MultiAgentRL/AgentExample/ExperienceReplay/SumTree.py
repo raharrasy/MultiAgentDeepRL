@@ -14,14 +14,13 @@ class SumTree(object):
     def search(self,priority):
         searchNode = self.root
         steps = []
-        print("----------------------------")
-        print("priority : "+str(priority) )
         while searchNode.left or searchNode.right:
             print(searchNode.left.getSum())
             if priority < searchNode.left.getSum():
                 searchNode = searchNode.left
                 steps.append(0)
             else:
+                priority -= searchNode.left.getSum()
                 searchNode = searchNode.right
                 steps.append(1)
         length = len(steps)
