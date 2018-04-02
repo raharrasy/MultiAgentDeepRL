@@ -35,7 +35,7 @@ class RankBasedExpReplay(object):
     def sample(self, samplesAmount):
 
         if (self.prevAlpha != self.alpha) or (self.prevSize != self.curSize) :
-                self.endPoints, self.weights = computeBoundaries(self.alpha, self.curSize, samplesAmount)
+                self.endPoints, self.weights = self.computeBoundaries(self.alpha, self.curSize, samplesAmount)
                 self.prevAlpha = self.alpha
                 self.prevSize = self.curSize
         totalWeights = sum(self.weights.tolist())
