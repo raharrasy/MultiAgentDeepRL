@@ -7,7 +7,7 @@ from DQN import ConvNet
 from ExperienceReplay import ExperienceReplay
 from RankBasedExpReplay import RankBasedExpReplay
 from WeightBasedExpReplay import WeightBasedExpReplay
-
+import math
 
 class Player(object) :
 	def __init__(self,x,y,color = (0,255,0), dead_period = 10, health = 2, batchSize=50, copyIteration = 5000, epsilon = 1.00, discountRate = 0.99, mode = "D-DQN", expDepth = 4, expWidth = 32, expHeight = 42, bufferMaxSize = 100000, alpha = 0.6, beta = 0.8, learningRate = 0.00001, rebalanceFrequency = 60000, weightAdder = 0.00001):
