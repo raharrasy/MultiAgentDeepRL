@@ -139,10 +139,10 @@ class Player(object) :
             
 	def modifyPriorities(self, predictionDifference, probPicked, indexes):
 		if "RUQL-Weight" in self.mode:
-			for a in len(indexes):
+			for a in range(len(indexes)):
 				self.ExperienceBuffer.modifyExperience(probPicked[a], indexes[a])                
 		else:
-			for a in len(indexes):
+			for a in range(len(indexes)):
 				self.ExperienceBuffer.modifyExperience(predictionDifference[a], indexes[a])
 
 	def act(self):
