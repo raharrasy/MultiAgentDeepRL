@@ -97,6 +97,8 @@ class Heap(object):
 
     def swim(self, priority):
         parentPrio = priority//2
+        print("---------------------------------")
+        print(self.p2w)
         while self.p2w[parentPrio] < self.p2w[priority] :
             indexPrio = self.p2i[priority]
             weightPrio = self.p2w[priority] 
