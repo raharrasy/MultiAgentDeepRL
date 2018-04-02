@@ -125,7 +125,7 @@ class Player(object) :
 			nextStates = np.asarray([a[3][0] for a in sampled_data])
 			endFlags = [a[4] for a in sampled_data]
 			dataY, predictionDifference, probPicked = self.targetCalculation(dataset, rewardList, nextStates, endFlags, takenActions)
-			learningWeights = self.weightCalculation(sampled_data)
+			learningWeights = self.weightCalculation(samplingWeights)
 			if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):            
 				self.modifyPriorities(predictionDifference, probPicked, indexList)
 			self.NN.learn(dataset,dataY, learningWeights)
@@ -217,8 +217,6 @@ class Player(object) :
 		multiplier = None        
 		if ("RankExpReplay" in self.mode) or ("WeightExpReplay" in self.mode):
 			adjustor = self.ExperienceBuffer.curSize+0.0
-			print("Adjustor : "+str(adjustor))
-			print("samplingWeights : "+str(samplingWeights))
 			w = np.power(samplingWeights * adjustor, -self.beta)
 			w_max = max(w)
 			w = np.divide(w, w_max)
