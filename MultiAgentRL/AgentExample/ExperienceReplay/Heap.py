@@ -118,4 +118,7 @@ class Heap(object):
         return self.p2i[priority+1]
 
     def getMaxPriority(self):
-        return self.p2w[1]
+        if self.size != 0:
+            return self.p2w[1]
+        else:
+            return self.p2w[0]
