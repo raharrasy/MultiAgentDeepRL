@@ -220,9 +220,9 @@ class Player(object) :
 			w = np.power(samplingWeights * adjustor, -self.beta)
 			w_max = max(w)
 			w = np.divide(w, w_max)
-			multiplier = np.asarray([[math.sqrt(b*self.learningRate) for b in weights]])
+			multiplier = np.asarray([[math.sqrt(b*self.learningRate) for b in w]])
 		else:
-			multiplier = np.asarray([[math.sqrt(self.learningRate) for b in weights]])
+			multiplier = np.asarray([[math.sqrt(self.learningRate) for b in samplingWeights]])
 		return multiplier
 
         

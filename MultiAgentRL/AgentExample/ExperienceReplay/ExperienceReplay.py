@@ -15,6 +15,8 @@ class ExperienceReplay(object):
     def sample(self, samplesAmount):
         sampledPoints = np.random.choice(self.curSize, samplesAmount, replace=False).tolist()
         expList = []
+        weightList = []
         for a in sampledPoints :
                 expList.append(self.buffer.getItem(a))
-        return np.asarray(expList), None, None
+                weightList.append(1.0/len(samplesAmount))
+        return np.asarray(expList), weightList, None
