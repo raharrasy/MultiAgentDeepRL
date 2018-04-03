@@ -28,6 +28,7 @@ class Heap(object):
         # Add heap size
         self.size += 1
         curPrio = self.size
+        print("curPrio : "+str(curPrio))
 
         # Add experience at the end of the heap
         self.p2i[curPrio] = index
