@@ -15,7 +15,6 @@ class SumTree(object):
         searchNode = self.root
         steps = []
         while searchNode.left or searchNode.right:
-            print(searchNode.left.getSum())
             if priority < searchNode.left.getSum():
                 searchNode = searchNode.left
                 steps.append(0)
