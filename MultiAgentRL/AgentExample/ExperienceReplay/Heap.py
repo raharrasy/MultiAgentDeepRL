@@ -19,7 +19,6 @@ class Heap(object):
 
     def add(self, index, weight):
         if index in self.i2p :
-            print("Index : "+str(index))
             self.delete(index)
             self.insert(index,weight)
         else:
@@ -53,9 +52,10 @@ class Heap(object):
             
         
             self.size -= 1
-            self.swim(changedPrio)
-            self.sink(changedPrio)
-
+            if not (changedPrio > self.size): 
+                self.swim(changedPrio)
+                self.sink(changedPrio)
+ 
     def sink(self, priority):
         children1 = 2*priority + 1
         children0 = 2*priority
@@ -98,9 +98,6 @@ class Heap(object):
 
     def swim(self, priority):
         parentPrio = priority//2
-        print("---------------------------------")
-        print("Priority : "+str(priority))
-        print(self.p2w)
         while self.p2w[parentPrio] < self.p2w[priority] :
             indexPrio = self.p2i[priority]
             weightPrio = self.p2w[priority] 
