@@ -19,6 +19,7 @@ class Heap(object):
 
     def add(self, index, weight):
         if index in self.i2p :
+            print("Index : "+str(index))
             self.delete(index)
             self.insert(index,weight)
         else:
@@ -28,7 +29,6 @@ class Heap(object):
         # Add heap size
         self.size += 1
         curPrio = self.size
-        print("curPrio : "+str(curPrio))
 
         # Add experience at the end of the heap
         self.p2i[curPrio] = index
